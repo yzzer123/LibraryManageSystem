@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>北化家里蹲图书馆登陆界面</title>
+</head>
+<body>
+    <div class="loginBox">
+        <h3>用户登入</h3>
+        <form method="post" action="/login/">
+            {% csrf_token %}
+            <input type="text" value="{{ Account }}" name="AccountID" placeholder="用户名" required>
+             {{ noAccount }}
+            <br/>
+            <input type="password" value="{{ pwd }}" name="Password" placeholder="密码" required>
+            {{ pwdWrong }}<br/>
+            <input type="submit" value="登录">
+        </form>
+    </div>
+</body>
+</html>
