@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+</head>
+<body>
+<div class="registerBox">
+        <h3>用户注册</h3>
+        <form method="post" action="/registercheck/">
+            {% csrf_token %}
+          用户名 <input type="text" value="{{ Account }}" name="AccountID" placeholder="用户名" required>
+            {% if isActERR %}
+                {{ ActERR }}
+            {% endif %}
+            <br/>
+            密码<input type="password" value="{{ pwd }}" name="Password" placeholder="密码" required>
+              {% if isPwdERR %}
+                {{ PwdERR }}
+            {% endif %}
+            <br/>
+            工号/学号 <input type="text" value="{{ ID }}" name="ID" placeholder="工号/学号" required>
+              {% if isIdERR %}
+                {{ IdERR }}
+            {% endif %}
+            <br/>
+             邮箱 <input type="email" value="{{ email }}" name="email" placeholder="邮箱" required>
+             {% if isEmailERR %}
+                {{ EmailERR }}
+            {% endif %}
+            <br/>
+             手机号 <input type="text" value="{{ phone }}" name="Phone" placeholder="手机号" required>
+              {% if isPhoneERR %}
+                {{ PhoneERR }}
+            {% endif %}
+            <br/>
+            <input type="radio" name="type" value="1" id="1" checked="{{ checkedM }}"> <label for="0">管理员</label>
+			<input type="radio" name="type" value="2" id="2" checked="{{ checkedR }}"> <label for="1">读者</label><br/>
+            <input type="submit" value="注册"><a href="/"><input type="button" value="返回"></a>
+
+        </form>
+
+    </div>
+</body>
+</html>

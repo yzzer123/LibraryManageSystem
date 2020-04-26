@@ -88,6 +88,9 @@ class Book(models.Model):
     PubTime = models.DateField(default="1999-10-11")
     ReadTimes = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.BName
+
 
 class User(models.Model):
     """
@@ -96,8 +99,11 @@ class User(models.Model):
      属性： 密码 Password 账户类别 Type
      """
     AccountID = models.CharField(max_length=20, primary_key=True, db_index=True)
-    Password = models.SlugField(max_length=40)
+    Password = models.CharField(max_length=40)
     Type = models.CharField(choices=ACCOUNT_TPYE, default="读者", max_length=20)  # 默认为普通用户
+
+    def __str__(self):
+        return self.AccountID
 
 
 class Manager(models.Model):
@@ -114,7 +120,10 @@ class Manager(models.Model):
     Phone = models.CharField(max_length=20, unique=True)
     Mail = models.EmailField(unique=True)
     Gender = models.CharField(max_length=20, choices=GENDER_CHOICE, default="保密")
-    MName = models.CharField(max_length=20)
+    MName = models.CharField(max_length=20, null=True)
+
+    def __str__(self):
+        return self.MName
 
 
 class Reader(models.Model):
@@ -131,9 +140,12 @@ class Reader(models.Model):
     Phone = models.CharField(max_length=20, unique=True)
     Mail = models.EmailField(unique=True)
     Gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="保密")
-    SName = models.CharField(max_length=20)
+    SName = models.CharField(max_length=20, null=True)
     School = models.CharField(max_length=20, choices=SCHOOLS, default="信息技术与科学学院")
     BLimit = models.IntegerField(default=3)
+
+    def __str__(self):
+        return self.SName
 
 
 class Borrow(models.Model):
@@ -153,6 +165,9 @@ class Borrow(models.Model):
 
     class Meta:
         unique_together = ('StudentID', 'BookID',)
+
+    def __str__(self):
+        return "学生%s借了%s书" % (self.StudentID, self.BookID)
 
 
 class BuyIn(models.Model):
@@ -177,6 +192,9 @@ class Message(models.Model):
     MTime = models.DateTimeField(auto_now_add=True)
     Status = models.CharField(max_length=20, choices=STATUS, default="未读")
 
+    def __str__(self):
+        return "消息主题：" + self.Title
+
 
 class Notice(models.Model):
     """
@@ -187,4 +205,6 @@ class Notice(models.Model):
     Content = models.TextField()
     ReadTimes = models.IntegerField(default=0)
 
+    def __str__(self):
+        return "公告主题：" + self.Title
 

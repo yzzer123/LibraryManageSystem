@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from BuctLib.models import *
+from BuctLib.src.formCheck import *
+from django.db.models import Q
 
-AccountID = ""
+AccountID = None
 AccountType = False
-LoginUser = ""
-UserAccount = ""
+LoginUser = None
+UserAccount = None
 
 
 def hello(request):
@@ -22,6 +24,7 @@ def loginpage(request):
         "isNoAct": False,
     }
     return render(request, "login.html", content)
+
 
 def logincheck(request):
     """
@@ -81,5 +84,120 @@ def logincheck(request):
     return HttpResponse("404")
 
 
+def register(request):
+    # 返回用户注册的页面
+    content = {
+        'isPwdERR': False,
+        'isActERR': False,
+        'isIdERR': False,
+        'isEmailERR': False,
+        'isPhoneERR': False,
+        'checkedM': "checked"
+    }
+    return render(request, "register.html", content)
+
+def registerCheck(request):
+    # 注册检查
+    account = request.POST["AccountID"]
+    pwd = request.POST["Password"]
+    ID = request.POST["ID"]
+    phone = request.POST["Phone"]
+    email = request.POST["email"]
+    Type = request.POST["type"]
+
+    # 记录返回值
+    content = {
+        'Account': account,
+        'pwd': pwd,
+        'ID': ID,
+        'email': email,
+        'phone': phone,
+        'isPwdERR': False,
+        'isActERR': False,
+        'isIdERR': False,
+        'isEmailERR': False,
+        'isPhoneERR': False,
+        'PwdERR': check_pwd(pwd),
+        'ActERR': check_user_name(account),
+        'IdERR': check_id(ID),
+        'EmailERR': "",  # Django会自动检查邮箱
+        'PhoneERR': check_phone(phone),
+    }
+    # 记录选中信息
+    if Type == 1:
+        content["checkedM"] = "checked"
+    else:
+        content["checkedR"] = "checked"
+    # 检查合法性
+    islegal = True
+    if content["PwdERR"] != "":
+        islegal = False
+        content["isPwdERR"] = True
+    if content["ActERR"] != "":
+        islegal = False
+        content["isActERR"] = True
+    if content["IdERR"] != "":
+        islegal = False
+        content["isIdERR"] = True
+    if content["PhoneERR"] != "":
+        islegal = False
+        content["isPhoneERR"] = True
+    if not islegal:
+        return render(request, "register.html", content)
+
+    search = User.objects.filter(AccountID=account)
+    if len(search) > 0:
+        content["isActERR"] = True
+        content["ActERR"] = ("账号已经存在请再试,可以尝试%s" % (account+"_123"))
+    del search
+    user = None
+    reader = None
+    manager = None
+    if Type == '2':
+        stusearch = Reader.objects.filter(Q(Phone=phone)|Q(StudentID=ID)|Q(Mail=email))
+        if len(stusearch) > 0:
+            for item in stusearch:
+                if phone == item.Phone:
+                    content["isPhoneERR"] = True
+                    content["PhoneERR"] = "手机号已被注册"
+                if ID == item.StudentID:
+                    content["isIdERR"] = True
+                    content["IdERR"] = "学号已被注册"
+                if email == item.Mail:
+                    content["isEmailERR"] = True
+                    content["EmailERR"] = "邮箱已被注册"
+            return render(request, "register.html", content)
+        user = User.objects.create(AccountID=account, Password=pwd, Type=Type)
+        reader = Reader.objects.create(StudentID=ID, AccountID=user, Phone=phone, Mail=email)
+
+    else:
+        manasearch = Manager.objects.filter(Q(Phone=phone) | Q(ManagerID=ID) | Q(Mail=email))
+        if len(manasearch) > 0:
+            for item in manasearch:
+                if phone == item.Phone:
+                    content["isPhoneERR"] = True
+                    content["PhoneERR"] = "手机号已被注册"
+                if ID == item.ManagerID:
+                    content["isIdERR"] = True
+                    content["IdERR"] = "工号已被注册"
+                if email == item.Mail:
+                    content["isEmailERR"] = True
+                    content["EmailERR"] = "邮箱已被注册"
+            return render(request, "register.html", content)
+        user = User.objects.create(AccountID=account, Password=pwd, Type=Type)
+        manager = Manager.objects.create(ManagerID=ID, AccountID=user, Phone=phone, Mail=email)
+    if manager:
+        manager.save()
+        user.save()
+    if reader:
+        reader.save()
+        user.save()
+    return render(request, "registerSuccess.html")
+
+
 def readerindex(request):
     pass
+
+
+def registerok(request):
+    return render(request, 'registerSuccess.html')
