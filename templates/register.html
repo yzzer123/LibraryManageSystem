@@ -34,8 +34,16 @@
                 {{ PhoneERR }}
             {% endif %}
             <br/>
-            <input type="radio" name="type" value="1" id="1" checked="{{ checkedM }}"> <label for="0">管理员</label>
-			<input type="radio" name="type" value="2" id="2" checked="{{ checkedR }}"> <label for="1">读者</label><br/>
+            {% if checkedM %}
+                <input type="radio" name="type" value="1" id="1" checked="checked"> <label for="0">管理员</label>
+			{% else %}
+                <input type="radio" name="type" value="1" id="1" > <label for="0">管理员</label>
+            {% endif %}
+            {% if checkedR %}
+                <input type="radio" name="type" value="2" id="2" checked="checked"> <label for="1">读者</label><br/>
+            {% else %}
+                <input type="radio" name="type" value="2" id="2" > <label for="1">读者</label><br/>
+            {% endif %}
             <input type="submit" value="注册"><a href="/"><input type="button" value="返回"></a>
 
         </form>

@@ -97,10 +97,13 @@ class User(models.Model):
      用户类 用于登陆
      主键： 账户名 AccountID
      属性： 密码 Password 账户类别 Type
+        邮箱 Email 电话 Tel
      """
     AccountID = models.CharField(max_length=20, primary_key=True, db_index=True)
     Password = models.CharField(max_length=40)
     Type = models.CharField(choices=ACCOUNT_TPYE, default="读者", max_length=20)  # 默认为普通用户
+    Email = models.EmailField(unique=True)
+    Tel = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.AccountID
@@ -111,19 +114,17 @@ class Manager(models.Model):
     管理员类 查询管理员信息
     主键： 工号 ManagerID
     外键： 账户名 AccountID
-    属性： 电话 Phone 邮箱Mail 性别 Gender 姓名 MName
+    属性：  性别 Gender 姓名 MName
     TODO(yzzer) 管理员照片 MImage
     """
 
     ManagerID = models.CharField(primary_key=True, max_length=20, db_index=True)
     AccountID = models.OneToOneField(User, on_delete=models.CASCADE)
-    Phone = models.CharField(max_length=20, unique=True)
-    Mail = models.EmailField(unique=True)
     Gender = models.CharField(max_length=20, choices=GENDER_CHOICE, default="保密")
     MName = models.CharField(max_length=20, null=True)
 
     def __str__(self):
-        return self.MName
+        return self.ManagerID
 
 
 class Reader(models.Model):
@@ -131,21 +132,19 @@ class Reader(models.Model):
      读者类 查阅读者信息
      主键： 学号 StudentID
      外键： 账户名 AccountID
-     属性： 电话 Phone 邮箱Mail 性别 Gender 姓名 SName
+     属性：  性别 Gender 姓名 SName
      学院 School 借书量 BLimit
     TODO(yzzer) 读者照片 MImage
      """
     StudentID = models.CharField(primary_key=True, max_length=20, db_index=True)
     AccountID = models.OneToOneField(User, on_delete=models.CASCADE)
-    Phone = models.CharField(max_length=20, unique=True)
-    Mail = models.EmailField(unique=True)
     Gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="保密")
     SName = models.CharField(max_length=20, null=True)
     School = models.CharField(max_length=20, choices=SCHOOLS, default="信息技术与科学学院")
     BLimit = models.IntegerField(default=3)
 
     def __str__(self):
-        return self.SName
+        return self.StudentID
 
 
 class Borrow(models.Model):

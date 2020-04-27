@@ -92,18 +92,20 @@ def register(request):
         'isIdERR': False,
         'isEmailERR': False,
         'isPhoneERR': False,
-        'checkedM': "checked"
+        "checkedM": True,
+        "checkedR": False,
     }
     return render(request, "register.html", content)
 
+
 def registerCheck(request):
     # 注册检查
-    account = request.POST["AccountID"]
-    pwd = request.POST["Password"]
-    ID = request.POST["ID"]
-    phone = request.POST["Phone"]
-    email = request.POST["email"]
-    Type = request.POST["type"]
+    account = request.POST.get("AccountID")
+    pwd = request.POST.get("Password")
+    ID = request.POST.get("ID")
+    phone = request.POST.get("Phone")
+    email = request.POST.get("email")
+    Type = request.POST.get("type")
 
     # 记录返回值
     content = {
@@ -117,80 +119,66 @@ def registerCheck(request):
         'isIdERR': False,
         'isEmailERR': False,
         'isPhoneERR': False,
+        "checkedM": True,
+        "checkedR": False,
         'PwdERR': check_pwd(pwd),
         'ActERR': check_user_name(account),
         'IdERR': check_id(ID),
-        'EmailERR': "",  # Django会自动检查邮箱
+        'EmailERR': check_email(email),  # Django会自动检查邮箱
         'PhoneERR': check_phone(phone),
     }
     # 记录选中信息
     if Type == 1:
-        content["checkedM"] = "checked"
+        content["checkedM"] = True
     else:
-        content["checkedR"] = "checked"
+        content["checkedR"] = True
     # 检查合法性
     islegal = True
-    if content["PwdERR"] != "":
-        islegal = False
-        content["isPwdERR"] = True
-    if content["ActERR"] != "":
-        islegal = False
-        content["isActERR"] = True
-    if content["IdERR"] != "":
-        islegal = False
-        content["isIdERR"] = True
-    if content["PhoneERR"] != "":
-        islegal = False
-        content["isPhoneERR"] = True
+    ERR: str
+    for ERR in ("PwdERR", "ActERR", "IdERR", "PhoneERR", "EmailERR"):
+        if content[ERR] != "":
+            islegal = False
+            content[("is"+ERR)] = True
+
     if not islegal:
         return render(request, "register.html", content)
 
-    search = User.objects.filter(AccountID=account)
+    search = User.objects.filter(Q(AccountID=account)|Q(Tel=phone) | Q(Email=email))
+
     if len(search) > 0:
-        content["isActERR"] = True
-        content["ActERR"] = ("账号已经存在请再试,可以尝试%s" % (account+"_123"))
-    del search
+        for item in search:
+            if phone == item.Tel:
+                content["isPhoneERR"] = True
+                content["PhoneERR"] = "手机号已被注册"
+            if email == item.Email:
+                content["isEmailERR"] = True
+                content["EmailERR"] = "邮箱已被注册"
+            if account == item.AccountID:
+                content["isActERR"] = True
+                content["ActERR"] = ("账号已经存在请再试,可以尝试%s" % (account+"_123"))
+        return render(request, "register.html", content)
     user = None
     reader = None
     manager = None
     if Type == '2':
-        stusearch = Reader.objects.filter(Q(Phone=phone)|Q(StudentID=ID)|Q(Mail=email))
-        if len(stusearch) > 0:
-            for item in stusearch:
-                if phone == item.Phone:
-                    content["isPhoneERR"] = True
-                    content["PhoneERR"] = "手机号已被注册"
-                if ID == item.StudentID:
-                    content["isIdERR"] = True
-                    content["IdERR"] = "学号已被注册"
-                if email == item.Mail:
-                    content["isEmailERR"] = True
-                    content["EmailERR"] = "邮箱已被注册"
+        search = Reader.objects.filter(StudentID=ID)
+        if len(search) > 0:
+            content["isIdERR"] = True
+            content["IdERR"] = "学号已被注册"
             return render(request, "register.html", content)
-        user = User.objects.create(AccountID=account, Password=pwd, Type=Type)
-        reader = Reader.objects.create(StudentID=ID, AccountID=user, Phone=phone, Mail=email)
-
-    else:
-        manasearch = Manager.objects.filter(Q(Phone=phone) | Q(ManagerID=ID) | Q(Mail=email))
-        if len(manasearch) > 0:
-            for item in manasearch:
-                if phone == item.Phone:
-                    content["isPhoneERR"] = True
-                    content["PhoneERR"] = "手机号已被注册"
-                if ID == item.ManagerID:
-                    content["isIdERR"] = True
-                    content["IdERR"] = "工号已被注册"
-                if email == item.Mail:
-                    content["isEmailERR"] = True
-                    content["EmailERR"] = "邮箱已被注册"
-            return render(request, "register.html", content)
-        user = User.objects.create(AccountID=account, Password=pwd, Type=Type)
-        manager = Manager.objects.create(ManagerID=ID, AccountID=user, Phone=phone, Mail=email)
-    if manager:
-        manager.save()
-        user.save()
-    if reader:
+        user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
+        reader = Reader.objects.create(StudentID=ID, AccountID=user)
         reader.save()
+        user.save()
+    else:
+        search = Manager.objects.filter(ManagerID=ID)
+        if len(search) > 0:
+            content["isIdERR"] = True
+            content["IdERR"] = "工号已被注册"
+            return render(request, "register.html", content)
+        user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
+        manager = Manager.objects.create(ManagerID=ID, AccountID=user)
+        manager.save()
         user.save()
     return render(request, "registerSuccess.html")
 

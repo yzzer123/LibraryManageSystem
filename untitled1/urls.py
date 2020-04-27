@@ -23,5 +23,4 @@ urlpatterns = [
     path(r'login/', views.logincheck),
     path(r'register/', views.register),
     path(r'registercheck/', views.registerCheck),
-    path(r'registerok/', views.registerok)
 ]

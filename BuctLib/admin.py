@@ -19,9 +19,9 @@ class UserAdmin(admin.ModelAdmin):
     用户管理类
     """
     list_display = [
-        "AccountID", "Password", "Type"
+        "AccountID", "Password", "Type", "Email", "Tel"
     ]
-    
+
 
 class ManagerAdmin(admin.ModelAdmin):
     """
@@ -29,8 +29,7 @@ class ManagerAdmin(admin.ModelAdmin):
     """
     list_display = [
         "ManagerID", "AccountID",
-        "Phone", "Mail", "Gender",
-        "MName",
+        "Gender", "MName",
     ]
 
 
@@ -40,8 +39,7 @@ class ReaderAdmin(admin.ModelAdmin):
     """
     list_display = [
         "StudentID", "AccountID",
-        "Phone", "Mail", "Gender",
-        "SName", "School", "BLimit"
+        "Gender", "SName", "School", "BLimit"
     ]
 
 
@@ -70,7 +68,7 @@ class NoticeAdmin(admin.ModelAdmin):
     公告管理类
     """
     list_display = [
-        "Title",  "NTime", "Content"
+        "Title", "NTime", "Content"
     ]
 
 
@@ -81,4 +79,3 @@ admin.site.register(Reader, ReaderAdmin)
 admin.site.register(Borrow, BorrowAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(Notice, NoticeAdmin)
-
