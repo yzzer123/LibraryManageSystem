@@ -1,8 +1,11 @@
+
+
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from BuctLib.models import *
 from BuctLib.src.formCheck import *
 from django.db.models import Q
+import os
 
 AccountID = None
 AccountType = False
@@ -19,6 +22,10 @@ def loginpage(request):
     :param request: none
     :return: 登录界面
     """
+    # global LoginUser
+    # if LoginUser:
+    #     return render(request, "testmodel/reader.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
+
     content = {
         "isPwdW": False,
         "isNoAct": False,
@@ -31,10 +38,11 @@ def logincheck(request):
     :param request: post的密码 账号
     :return: 报错信息 或者主页
     """
+
     global AccountID, AccountType, LoginUser, UserAccount
     account = request.POST.get("AccountID")
     pswd = request.POST.get("Password")
-    search_result = User.objects.filter(AccountID=account)
+    search_result = User.objects.filter(Q(AccountID=account) | Q(Email=account) | Q(Tel=account))
     if len(search_result) == 1:
         # 如果有这个账户
         if pswd == search_result[0].Password:
@@ -42,7 +50,7 @@ def logincheck(request):
             print(search_result[0].Type)
             if search_result[0].Type == "2":
                 # 查读者表
-                AccountID = account
+                AccountID = search_result[0].AccountID
                 AccountType = False
                 UserAccount = search_result[0]
                 try:
@@ -52,7 +60,7 @@ def logincheck(request):
                 return render(request, "testmodel/reader.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
             elif search_result[0].Type == "1":
                 # 查管理员表
-                AccountID = account
+                AccountID = search_result[0].AccountID
                 AccountType = True
                 UserAccount = search_result[0]
                 try:
