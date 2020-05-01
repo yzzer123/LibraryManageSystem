@@ -26,5 +26,7 @@ urlpatterns = [
     path(r'login/', views.logincheck),
     path(r'register/', views.register),
     path(r'registercheck/', views.registerCheck),
+    path(r'404/', views.page404),
+    path(r'jump/', views.jump),
     url(r'favicon.ico/', RedirectView.as_view(url=r'/static/img/icons/lib.svg')),
 ]

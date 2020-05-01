@@ -1,0 +1,110 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html,body {
+  height: 100%;
+  width: 100%;
+
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(to right,#fbc2eb,#a6c1ee);
+  -webkit-background-image:linear-gradient(to right,#fbc2eb,#a6c1ee);
+}
+
+.main-container {
+  width: 80%;
+  max-width: 1000px;
+  max-height: 500px;
+  min-width: 600px;
+  background-color: white;
+  font-size: 0;
+  border-radius: 20px;
+  box-shadow: 0 0 50px 0 rgba(146, 146, 146, 0.63);
+}
+
+.main-container .container-item {
+  display: inline-block;
+  vertical-align: middle;
+  width: 50%;
+}
+
+.main-container .img-container {
+  background-color: rgba(253, 216, 168, 0.692);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+
+
+.main-container .text-container .msg {
+  font-size: 18px;
+  text-align: center;
+  font-weight: 200;
+  margin-bottom: 20px;
+}
+
+.main-container .text-container .action {
+  font-size: 18px;
+  font-weight: 200;
+  text-align: center;
+  text-decoration-line: underline;
+  cursor: pointer;
+}
+.loading3 .wrapper {
+  text-align: center;
+}
+
+.loading3 .wrapper .item {
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  font-size: 0;
+  transform: translateY(135px);
+}
+
+.loading3 .wrapper .item::before {
+  content: '';
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  background-image: linear-gradient(to right,#fbc2eb,#a6c1ee);
+  border-radius: 15px;
+}
+
+.loading3 .wrapper .item:nth-child(1)::before {
+  animation: loading3 2s infinite 0s;
+}
+.loading3 .wrapper .item:nth-child(2)::before {
+  animation: loading3 2s infinite 0.2s;
+}
+.loading3 .wrapper .item:nth-child(3)::before {
+  animation: loading3 2s infinite 0.4s;
+}
+
+@keyframes loading3 {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.main-container .text-container .code {
+  font-size: clamp(150px,20vw,200px);
+  font-family: 'Arial Narrow', 'Arial';
+
+  font-weight: bolder;
+  text-align: center;
+   background-image: linear-gradient(to right,#fbc2eb,#a6c1ee);
+    color: transparent;
+  -webkit-background-clip: text;
+}

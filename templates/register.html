@@ -10,59 +10,96 @@
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+     {% load static %} }
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/register.css">
-    <link rel="stylesheet" href="/static/css/background.css">
-    <link rel="stylesheet" href="/static/css/login.css">
 
     <script src="/static/js/formflash.js" ></script>
+    <style>
 
+
+    </style>
 </head>
-<body class="background-image">
-    <div class="login-box">
-        <h3>用户注册</h3>
-        <form method="post" action="/registercheck/">
+<body class="html-container">
+    <div class="register-box">
+
+        <form method="post" class="form-wrapper" action="/registercheck/">
+        <div class="form-header">用户注册</div>
             {% csrf_token %}
-          用户名 <input type="text" value="{{ Account }}" name="AccountID" placeholder="用户名" required>
-            {% if isActERR %}
-                {{ ActERR }}
-            {% endif %}
+           <input type="text" class="input-box act" value="{{ Account }}" name="AccountID" placeholder="用户名" required>
+                <p class="errmsg"> {{ ActERR }} </p>
+
+
+           <input type="password" class="input-box pwd" value="{{ pwd }}" name="Password" placeholder="密码" required>
+                  <p class="errmsg"> {{ PwdERR }}</p>
+
+            <input type="text" class="input-box Id"   value="{{ ID }}" name="ID" placeholder="工号/学号" required>
+
+                  <p class="errmsg"> {{ IdERR }}</p>
+
+
+            <input type="email" class="input-box eml"  value="{{ email }}" name="email" placeholder="邮箱" required>
+
+                 <p class="errmsg"> {{ EmailERR }}</p>
+
+           <input type="text"  class="input-box phone"   value="{{ phone }}" name="Phone" placeholder="手机号" required>
+
+               <p class="errmsg"> {{ PhoneERR }}</p>
+
             <br/>
-            密码<input type="password" value="{{ pwd }}" name="Password" placeholder="密码" required>
-              {% if isPwdERR %}
-                {{ PwdERR }}
-            {% endif %}
-            <br/>
-            工号/学号 <input type="text" value="{{ ID }}" name="ID" placeholder="工号/学号" required>
-              {% if isIdERR %}
-                {{ IdERR }}
-            {% endif %}
-            <br/>
-             邮箱 <input type="email" value="{{ email }}" name="email" placeholder="邮箱" required>
-             {% if isEmailERR %}
-                {{ EmailERR }}
-            {% endif %}
-            <br/>
-             手机号 <input type="text" value="{{ phone }}" name="Phone" placeholder="手机号" required>
-              {% if isPhoneERR %}
-                {{ PhoneERR }}
-            {% endif %}
-            <br/>
+            <div class="line">
             {% if checkedM %}
-                <input type="radio" name="type" value="1" id="1" checked="checked"> <label for="0">管理员</label>
-			{% else %}
-                <input type="radio" name="type" value="1" id="1" > <label for="0">管理员</label>
+                <div class="radio">
+                <input type="radio" name="type" value="1" id="1" checked="checked"> <label   class="radio-label" for="0">管理员</label>
+			    </div>
+            {% else %}
+                <div class="radio">
+                <input type="radio" name="type" value="1" id="1" > <label  class="radio-label"   for="0">管理员</label>
+                 </div>
             {% endif %}
             {% if checkedR %}
-                <input type="radio" name="type" value="2" id="2" checked="checked"> <label for="1">读者</label><br/>
+                <div class="radio">
+                <input type="radio" name="type" value="2" id="2" checked="checked"> <label  class="radio-label"  for="1">读者</label>
+                 </div>
             {% else %}
-                <input type="radio" name="type" value="2" id="2" > <label for="1">读者</label><br/>
+                <div class="radio">
+                <input type="radio" name="type" value="2" id="2" > <label  class="radio-label" for="1">读者</label>
+                 </div>
             {% endif %}
-            <input type="submit" value="注册"><a href="/"><input type="button" value="返回"></a>
+            </div>
+            <input type="submit" class="btn" value="注册">
+            <div class="msg">已有账号？<a href="/">返回</a></div>
 
         </form>
 
     </div>
+<script>
+         $(document).ready(function () {
+            let noAct = "{{ ActERR }}";
+            let pwdErr = "{{ PwdERR }}";
+            let IdERR = "{{ IdERR }}";
+            let EmailERR = "{{ EmailERR }}";
+            let PhoneERR = "{{ PhoneERR }}";
 
+
+            if (noAct !== "")
+                flash(".act",8,10,100);
+            if (pwdErr !== "")
+                flash(".pwd",8,10,100);
+            if (IdERR !== "")
+                flash(".Id", 8, 10, 100);
+             if (EmailERR !== "")
+                flash(".eml",8,10,100);
+             if (PhoneERR !== "")
+                flash(".phone",8,10,100);
+            $('.carousel').carousel({
+              interval: 5000
+            })
+            $('.btn').click(function () {
+                flash(this,8,10,100);
+            })
+
+        });
+    </script>
 </body>
 </html>

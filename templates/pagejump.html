@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/css/page404.css">
+  <title>注册成功</title>
+     <script>
+        window.onload = function () {
+            let count = document.getElementById('count');
+            let number = 4;
+            let counter = setInterval(()=>{
+                    if(number==0){
+                        clearInterval(counter);
+                        window.location.href = "/";
+                    }
+                    count.innerHTML = `${number}`;
+                    number --;
+                },1000)
+        }
+    </script>
+    <style>
+        .code{
+            position: absolute;
+            top: 0px;
+            right: 440px;
+        }
+    </style>
+</head>
+<body >
+  <div class="main-container">
+    <div class="img-container container-item">
+      <img src="/static/img/404.svg">
+    </div>
+    <div class="text-container container-item">
+      <div class="loading loading3 code ">
+        <div class="wrapper">
+          <div class="item"></div>
+          <div class="item"></div>
+          <div class="item"></div>
+        </div>
+      </div>
+      <div class="msg">注册成功，还有<span id="count">5</span>秒,正在返回首页...</div>
+      <div class="action center" ><a href="/">立即返回</a></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -136,10 +136,11 @@ def registerCheck(request):
         'PhoneERR': check_phone(phone),
     }
     # 记录选中信息
-    if Type == 1:
+    if Type == '1':
         content["checkedM"] = True
-    else:
+    elif Type == '2':
         content["checkedR"] = True
+        content["checkedM"] = False
     # 检查合法性
     islegal = True
     ERR: str
@@ -188,12 +189,16 @@ def registerCheck(request):
         manager = Manager.objects.create(ManagerID=ID, AccountID=user)
         manager.save()
         user.save()
-    return render(request, "registerSuccess.html")
+    return render(request, "pagejump.html")
 
 
 def readerindex(request):
     pass
 
 
-def registerok(request):
-    return render(request, 'registerSuccess.html')
+def page404(request):
+    return render(request, "page404.html")
+
+
+def jump(request):
+    return render(request, "pagejump.html")
