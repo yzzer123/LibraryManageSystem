@@ -1,5 +1,3 @@
-
-
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from BuctLib.models import *
@@ -9,8 +7,8 @@ import os
 
 AccountID = None
 AccountType = False
-LoginUser = None
-UserAccount = None
+LoginUser = None  # 登陆的账号
+UserAccount = None  # 登陆的账户
 
 
 def hello(request):
@@ -22,15 +20,27 @@ def loginpage(request):
     :param request: none
     :return: 登录界面
     """
-    # global LoginUser
-    # if LoginUser:
-    #     return render(request, "testmodel/reader.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
+    global LoginUser
+    if LoginUser:
+        if not AccountType:
+            return readerindex(request)
+        else:
+            return render(request, "testmodel/manager.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
 
     content = {
         "isPwdW": False,
         "isNoAct": False,
     }
     return render(request, "login.html", content)
+
+
+def loginout(request):
+    global AccountType, AccountID, LoginUser, UserAccount
+    AccountID = None
+    AccountType = False
+    LoginUser = None  # 登陆的账号
+    UserAccount = None  # 登陆的账户
+    return loginpage(request)
 
 
 def logincheck(request):
@@ -57,7 +67,7 @@ def logincheck(request):
                     LoginUser = Reader.objects.get(AccountID=AccountID)
                 except:
                     raise Http404
-                return render(request, "testmodel/reader.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
+                return readerindex(request)
             elif search_result[0].Type == "1":
                 # 查管理员表
                 AccountID = search_result[0].AccountID
@@ -66,7 +76,8 @@ def logincheck(request):
                 try:
                     LoginUser = Manager.objects.get(AccountID=AccountID)
                 except:
-                    raise Http404
+                    return page404(request)
+
                 return render(request, "testmodel/manager.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
         else:
             # 密码错误
@@ -147,12 +158,12 @@ def registerCheck(request):
     for ERR in ("PwdERR", "ActERR", "IdERR", "PhoneERR", "EmailERR"):
         if content[ERR] != "":
             islegal = False
-            content[("is"+ERR)] = True
+            content[("is " + ERR)] = True
 
     if not islegal:
         return render(request, "register.html", content)
 
-    search = User.objects.filter(Q(AccountID=account)|Q(Tel=phone) | Q(Email=email))
+    search = User.objects.filter(Q(AccountID=account) | Q(Tel=phone) | Q(Email=email))
 
     if len(search) > 0:
         for item in search:
@@ -164,7 +175,7 @@ def registerCheck(request):
                 content["EmailERR"] = "邮箱已被注册"
             if account == item.AccountID:
                 content["isActERR"] = True
-                content["ActERR"] = ("账号已经存在请再试,可以尝试%s" % (account+"_123"))
+                content["ActERR"] = ("账号已经存在请再试,可以尝试%s" % (account + "_123"))
         return render(request, "register.html", content)
     user = None
     reader = None
@@ -193,7 +204,12 @@ def registerCheck(request):
 
 
 def readerindex(request):
-    pass
+    global AccountID, LoginUser, UserAccount
+
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+
+    return render(request, "index.html", {LoginUser: LoginUser, UserAccount: UserAccount})
 
 
 def page404(request):
@@ -202,3 +218,43 @@ def page404(request):
 
 def jump(request):
     return render(request, "pagejump.html")
+
+
+def pwdmdf(request):
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    return render(request, "student/information/pwd-mdf.html", {LoginUser: LoginUser, UserAccount: UserAccount})
+
+
+def checkpwd(request):
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    content = {
+        LoginUser: LoginUser, UserAccount: UserAccount,
+
+    }
+    oldpwd = request.POST.get("old_pwd")
+    newpwd = request.POST.get("new_pwd")
+    renewpwd = request.POST.get("renew_pwd")
+    if oldpwd != UserAccount.Password:
+        content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+        content["pwderr"] = "原密码错误"
+        return render(request, "student/information/pwd-mdf.html", content)
+    else:
+        err = check_pwd(newpwd)
+        if err != "":
+            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["newpwderr"] = err
+            return render(request, "student/information/pwd-mdf.html", content)
+        elif newpwd == oldpwd:
+            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["newpwderr"] = "与原密码相同"
+            return render(request, "student/information/pwd-mdf.html", content)
+        elif renewpwd != newpwd:
+            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["renewpwderr"] = "密码不一致"
+            return render(request, "student/information/pwd-mdf.html", content)
+    UserAccount.Password = newpwd
+    UserAccount.save()
+    content["work"] = "work"
+    return render(request, "student/information/pwd-mdf.html", content)

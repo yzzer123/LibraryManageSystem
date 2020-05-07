@@ -7,9 +7,8 @@ class BookAdmin(admin.ModelAdmin):
     """
     图书管理类
     """
-    list_display = ['BookID', "BName", "Publisher",
-                    "Version", "Author", "Content",
-                    "NumInLib", "NumNow", "Area",
+    list_display = ['BookID', "BName", "Publisher", "Author", "Content",
+                    "NumInLib", "NumNow",
                     "Category", "PubTime", "ReadTimes"
                     ]
 
@@ -29,7 +28,7 @@ class ManagerAdmin(admin.ModelAdmin):
     """
     list_display = [
         "ManagerID", "AccountID",
-        "Gender", "MName",
+        "Gender", "Name",
     ]
 
 
@@ -39,7 +38,19 @@ class ReaderAdmin(admin.ModelAdmin):
     """
     list_display = [
         "StudentID", "AccountID",
-        "Gender", "SName", "School", "BLimit"
+        "Gender", "Name", "School", "Type", "Class"
+    ]
+
+
+class FineAdmin(admin.ModelAdmin):
+    list_display = [
+        "LimitDay", "FineMoney"
+    ]
+
+
+class ReaderClassAdmin(admin.ModelAdmin):
+    list_display = [
+        "Class", "Limited"
     ]
 
 
@@ -49,7 +60,7 @@ class BorrowAdmin(admin.ModelAdmin):
     """
     list_display = [
         "StudentID", "BookID", "BorrowTime",
-        "BorrowDay", "ReNewTimes"
+        "ReturnDay", "isReBorrowed", "isDelete"
     ]
 
 
@@ -79,3 +90,5 @@ admin.site.register(Reader, ReaderAdmin)
 admin.site.register(Borrow, BorrowAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(Notice, NoticeAdmin)
+admin.site.register(ReaderClass, ReaderClassAdmin)
+admin.site.register(Fine, FineAdmin)

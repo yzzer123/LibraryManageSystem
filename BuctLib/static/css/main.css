@@ -64,4 +64,23 @@
 .index-content{
   margin-top: 50px;
 }
-
+.card-color{
+  opacity: 80%;
+}
+.login-out-btn{
+  width: 180px;
+  height: 30px;
+  text-align: center;
+  margin-left: 30px;
+  margin-top: 100%;
+  opacity: 80%;
+}
+.login-out-btn:hover{
+  opacity: 40%;
+}
+.pwd-form{
+  width: 500px;
+}
+.pwd-smt-bnt{
+  width: 200px;
+}

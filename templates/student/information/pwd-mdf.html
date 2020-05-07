@@ -217,7 +217,7 @@
                   </li>
               </ul>
           </li>
-          <li class="nav-item has-treeview ">
+          <li class="nav-item has-treeview menu-open active">
         <a href="#" class="nav-link">
           <i class="nav-icon fa fa-address-card" style="color: #6bbbdc"></i>
           <p>
@@ -232,8 +232,8 @@
                         <p>修改信息</p>
                     </a>
               </li>
-               <li class="nav-item">
-                    <a class="nav-link" href="/pwdmdf/">
+               <li class="nav-item ">
+                    <a class="nav-link active" href="#">
                         <i class="far fa-circle nav-icon"></i>
                         <p>修改密码</p>
                     </a>
@@ -258,13 +258,13 @@
   </aside>
 
   <!-- 内容容器. 包含界面内容 -->
-  <div class="content-wrapper backgroundImage">
+  <div class="content-wrapper">
     <!-- 标题 -->
     <div class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 font-weight-light">欢迎读者</h1>
+            <h1 class="m-0 font-weight-light">修改密码</h1>
           </div><!-- /.col -->
         </div><!-- /.row -->
       </div>
@@ -274,133 +274,42 @@
     <!-- 页面内容 -->
     <div class="content"> <!--页面内容类-->
       <div class="container-fluid">
-       <div class="row search-box">
-                <!-- 主搜索框 -->
-            <form class="form-inline   m-auto  ">
-              <div class="input-group input-group-lg">
-                <input class="form-control form-control-navbar" type="search" placeholder="搜索图书" aria-label="Search">
-                <div class="input-group-append gradient-color-ver hoverColor search-radius search-margin-left">
-                  <button class="btn btn-navbar " type="submit">
-                    <i class="fas fa-search" style="color: white"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-        </div>
-        <!-- /.row -->
-          <div class="row index-content"    >
-              <div class="card col-lg-4 offset-lg-1 card-color">
-              <div class="card-header">
-                <h3 class="card-title">热门图书</h3>
+            <div class="row">
+                 <!-- general form elements -->
+            <div class="card card-primary  m-auto ">
+              <div class="card-header gradient-color-ver">
+                <h3 class="card-title">密码修改</h3>
               </div>
               <!-- /.card-header -->
-              <div class="card-body p-0">
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th style="width: 6px">#</th>
-                      <th>书名</th>
-                        <th>作者</th>
-                      <th >借阅数量</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1.</td>
-                      <td>他改变了中国</td>
-                        <td>罗伯特·劳伦斯·库恩</td>
-                      <td><span class="badge bg-danger" style="width: 70px">555</span></td>
-                    </tr>
-                    <tr>
-                      <td>2.</td>
-                      <td>算法导论</td>
-                        <td>Thomas H.Cormen</td>
-                      <td><span class="badge bg-warning" style="width: 70px">540</span></td>
-                    </tr>
-                    <tr>
-                      <td>3.</td>
-                      <td>成为守夜冠军</td>
-                        <td>游张政</td>
-                      <td><span class="badge bg-primary" style="width: 70px">530</span></td>
-                    </tr>
-                    <tr>
-                      <td>4.</td>
-                      <td>我的老家</td>
-                        <td>江小白</td>
-                      <td><span class="badge bg-success" style="width: 70px">520</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
+              <!-- form start -->
+              <form role="form" method="post" action="/checkpwd/" class="pwd-form">
+                  {% csrf_token %}
+                <div class="card-body">
+                 <div class="form-group">
+                    <label for="exampleInputPassword1">原密码</label>
+                     <input type="password" class="form-control" value="{{ oldpwd }}" required name="old_pwd" id="exampleInputPassword1" placeholder="Password">
+                    <span id="terms-error" class="error invalid-feedback"  style="display: inline;">{{ pwderr }}</span>
+                 </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">新密码</label>
+                    <input type="password" class="form-control" name="new_pwd" value="{{ newpwd }}" required id="exampleInputPassword1" placeholder="Password">
+                     <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ newpwderr }}</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">重复新密码</label>
+                    <input type="password" class="form-control" name="renew_pwd" value="{{ renewpwd }}" id="exampleInputPassword1" placeholder="Password">
+                     <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ renewpwderr }}</span>
+                  </div>
 
-            </div>
-               <div class="card col-lg-4 offset-lg-2 card-color">
-              <div class="card-header">
-                <h3 class="card-title">图书馆公告</h3>
-
-                <div class="card-tools">
-                  <ul class="pagination pagination-sm float-right">
-                    <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-                  </ul>
                 </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body p-0">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th style="width: 10px">#</th>
-                      <th>标题</th>
-                      <th>发布时间</th>
-                      <th >阅读量</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1.</td>
-                      <td> <a href="#">疫情期间管理方案</a></td>
-                      <td>
-                            2020-5-4
-                      </td>
-                      <td><span class="badge bg-danger" style="width: 70px">995</span></td>
-                    </tr>
-                    <tr>
-                      <td>2.</td>
-                      <td><a href="#">借书制度变更</a></td>
-                      <td>
-                         2020-5-4
-                      </td>
-                      <td><span class="badge bg-warning" style="width: 70px">700</span></td>
-                    </tr>
-                    <tr>
-                      <td>3.</td>
-                      <td><a href="#">图书馆开放时间</a></td>
-                      <td>
-                         2020-5-4
-                      </td>
-                      <td><span class="badge bg-primary" style="width: 70px">400</span></td>
-                    </tr>
-                    <tr>
-                      <td>4.</td>
-                      <td><a href="#">引入新书</a></td>
-                      <td>
-                            2020-5-4
-                      </td>
-                      <td><span class="badge bg-success" style="width: 70px">560</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
+                <!-- /.card-body -->
 
-          </div>
+                <div class="card-footer row">
+                  <button type="submit" id="pwd-smt"  class="btn btn-primary m-auto pwd-smt-bnt">提交</button>
+                </div>
+              </form>
+            </div>
+            </div>
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
@@ -436,6 +345,10 @@
     window.onload = function () {
         document.getElementById("login-out").onclick = function () {
             window.location.href = "/loginout/";
+
+        }
+        if("{{ work }}" === "work"){
+            alert("修改成功");
         }
         $("#Menu").click(function () {
             var btn = $("#login-out");

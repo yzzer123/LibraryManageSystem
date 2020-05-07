@@ -69,21 +69,19 @@ class Book(models.Model):
     """
     图书类  查询图书信息
     主键： 图书编号 BookID
-    属性： ISBN ISBN 书名BName  出版社Publisher  版本 Version
+    属性： ISBN ISBN 书名BName  出版社Publisher
     作者 Author 图书简介 Content 馆藏数量 NumInLib 在架数量 NumNow
-    所属区域 Area 分类 Category 出版时间 PubTime
+    分类 Category 出版时间 PubTime
     ReadTimes 阅读数
     TODO(yzzer) 图书封面 BImage
     """
     BookID = models.AutoField(primary_key=True, db_index=True)
-    BName = models.CharField(max_length=20)
-    Publisher = models.CharField(max_length=20)
-    Version = models.CharField(max_length=20)
-    Author = models.CharField(max_length=20)
+    BName = models.CharField(max_length=40)
+    Publisher = models.CharField(max_length=40)
+    Author = models.CharField(max_length=30)
     Content = models.TextField(default="无", blank=True, null=True)
     NumInLib = models.PositiveSmallIntegerField(default=0)
     NumNow = models.PositiveSmallIntegerField(default=0)
-    Area = models.CharField(max_length=20, choices=LibFloor)
     Category = models.CharField(max_length=30, default="未分类", choices=CATEGORY_CHOICE)
     PubTime = models.DateField(default="1999-10-11")
     ReadTimes = models.IntegerField(default=0)
@@ -99,9 +97,9 @@ class User(models.Model):
      属性： 密码 Password 账户类别 Type
         邮箱 Email 电话 Tel
      """
-    AccountID = models.CharField(max_length=20, primary_key=True, db_index=True)
+    AccountID = models.CharField(max_length=40, primary_key=True, db_index=True)
     Password = models.CharField(max_length=40)
-    Type = models.CharField(choices=ACCOUNT_TPYE, default="读者", max_length=20)  # 默认为普通用户
+    Type = models.CharField(choices=ACCOUNT_TPYE, default="读者", max_length=10)  # 默认为普通用户
     Email = models.EmailField(unique=True)
     Tel = models.CharField(max_length=20, unique=True)
 
@@ -118,13 +116,23 @@ class Manager(models.Model):
     TODO(yzzer) 管理员照片 MImage
     """
 
-    ManagerID = models.CharField(primary_key=True, max_length=20, db_index=True)
-    AccountID = models.OneToOneField(User, on_delete=models.CASCADE)
-    Gender = models.CharField(max_length=20, choices=GENDER_CHOICE, default="保密")
-    MName = models.CharField(max_length=20, null=True)
+    ManagerID = models.CharField(primary_key=True, max_length=30, db_index=True)
+    AccountID = models.OneToOneField(to="User", on_delete=models.CASCADE)
+    Gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="保密")
+    Name = models.CharField(max_length=30, null=True)
 
     def __str__(self):
         return self.ManagerID
+
+
+class ReaderClass(models.Model):
+    """
+    读者级别类
+    Class为级别
+    Limited为可借阅数量
+    """
+    Class = models.CharField(max_length=4, primary_key=True, db_index=True)
+    Limited = models.PositiveSmallIntegerField(default=3)
 
 
 class Reader(models.Model):
@@ -133,18 +141,30 @@ class Reader(models.Model):
      主键： 学号 StudentID
      外键： 账户名 AccountID
      属性：  性别 Gender 姓名 SName
-     学院 School 借书量 BLimit
+     学院 School
+     类型 Type
     TODO(yzzer) 读者照片 MImage
      """
-    StudentID = models.CharField(primary_key=True, max_length=20, db_index=True)
+    StudentID = models.CharField(primary_key=True, max_length=30, db_index=True)
     AccountID = models.OneToOneField(User, on_delete=models.CASCADE)
     Gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="保密")
-    SName = models.CharField(max_length=20, null=True)
-    School = models.CharField(max_length=20, choices=SCHOOLS, default="信息技术与科学学院")
-    BLimit = models.IntegerField(default=3)
+    Name = models.CharField(max_length=30, null=True)
+    School = models.CharField(max_length=30, choices=SCHOOLS, default="信息技术与科学学院")
+    Class = models.ForeignKey(to="ReaderClass", on_delete=models.SET_DEFAULT, default="A")
+    Type = models.CharField(max_length=10, default='学生')
 
     def __str__(self):
         return self.StudentID
+
+
+class Fine(models.Model):
+    """
+    处罚规则类
+    LimitDay是小于该期限的处罚金额
+    FineMoney是处罚金额
+    """
+    LimitDay = models.PositiveSmallIntegerField(unique=True)
+    FineMoney = models.PositiveSmallIntegerField(default=10)
 
 
 class Borrow(models.Model):
@@ -152,18 +172,16 @@ class Borrow(models.Model):
     借阅记录类
     主键 学号 StudentID &&  图书编号 BookID
     外键 学号 StudentID &&  图书编号 BookID
-    借书时间 BorrowTime 借书天数BorrowDay
-    续借次数 RenewTimes
+    借书时间 BorrowTime 还书日期 returnTime
+    续借状态 isReBorrowed
     """
-
-    StudentID = models.ForeignKey(Reader, on_delete=models.DO_NOTHING)
-    BookID = models.ForeignKey(Book, on_delete=models.DO_NOTHING)
+    StudentID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
+    BookID = models.ForeignKey(to="Book", on_delete=models.DO_NOTHING)
     BorrowTime = models.DateField(auto_now_add=True)
-    BorrowDay = models.PositiveSmallIntegerField(default=30)
-    ReNewTimes = models.IntegerField(default=3)
-
-    class Meta:
-        unique_together = ('StudentID', 'BookID',)
+    ReturnDay = models.DateField(auto_now_add=True)
+    isReBorrowed = models.BooleanField(default=False)
+    isDelete = models.BooleanField(default=False)
+    isAllowed = models.NullBooleanField(null=True)
 
     def __str__(self):
         return "学生%s借了%s书" % (self.StudentID, self.BookID)
@@ -186,7 +204,7 @@ class Message(models.Model):
         ('2', '未读')
     ]
     Title = models.CharField(max_length=255, verbose_name='消息标题')
-    StudentID = models.ForeignKey(Reader, on_delete=models.DO_NOTHING)
+    StudentID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
     Content = models.TextField()
     MTime = models.DateTimeField(auto_now_add=True)
     Status = models.CharField(max_length=20, choices=STATUS, default="未读")
