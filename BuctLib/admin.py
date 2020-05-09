@@ -37,7 +37,7 @@ class ReaderAdmin(admin.ModelAdmin):
     读者管理类
     """
     list_display = [
-        "StudentID", "AccountID",
+        "ReaderID", "AccountID",
         "Gender", "Name", "School", "Type", "Class"
     ]
 
@@ -59,7 +59,7 @@ class BorrowAdmin(admin.ModelAdmin):
     阅读记录管理类
     """
     list_display = [
-        "StudentID", "BookID", "BorrowTime",
+        "ReaderID", "BookID", "BorrowTime",
         "ReturnDay", "isReBorrowed", "isDelete"
     ]
 
@@ -69,7 +69,7 @@ class MessageAdmin(admin.ModelAdmin):
     消息管理类
     """
     list_display = [
-        "Title", "StudentID", "Content",
+        "Title", "ReaderID", "Content",
         "MTime"
     ]
 

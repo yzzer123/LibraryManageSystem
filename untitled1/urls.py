@@ -20,10 +20,11 @@ from django.contrib import admin
 from django.urls import path
 from BuctLib import views
 from django.views.generic.base import RedirectView
-urlpatterns = [
+urlpatterns = (
     path('admin/', admin.site.urls),
     path('loginout/', views.loginout),
     path(r'', views.loginpage),
+    path(r'debug/', views.hello),
     path(r'pwdmdf/', views.pwdmdf),
     path(r'login/', views.logincheck),
     path(r'register/', views.register),
@@ -32,7 +33,7 @@ urlpatterns = [
     path(r'404/', views.page404),
     path(r'jump/', views.jump),
     path(r'checkpwd/', views.checkpwd),
+    url(r'infomdf/', views.infmdf, name="modify information"),
     url(r'favicon.ico/', RedirectView.as_view(url=r'/static/img/icons/lib.svg')),
-    url(r'favicon.ico/', RedirectView.as_view(url=r'')),
 
-]
+)

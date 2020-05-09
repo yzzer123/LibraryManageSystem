@@ -134,27 +134,30 @@ class ReaderClass(models.Model):
     Class = models.CharField(max_length=4, primary_key=True, db_index=True)
     Limited = models.PositiveSmallIntegerField(default=3)
 
+    def __str__(self):
+        return self.Class
+
 
 class Reader(models.Model):
     """
      读者类 查阅读者信息
-     主键： 学号 StudentID
+     主键： 学号 ReaderID
      外键： 账户名 AccountID
      属性：  性别 Gender 姓名 SName
      学院 School
      类型 Type
     TODO(yzzer) 读者照片 MImage
      """
-    StudentID = models.CharField(primary_key=True, max_length=30, db_index=True)
+    ReaderID = models.CharField(primary_key=True, max_length=30, db_index=True)
     AccountID = models.OneToOneField(User, on_delete=models.CASCADE)
     Gender = models.CharField(max_length=10, choices=GENDER_CHOICE, default="保密")
-    Name = models.CharField(max_length=30, null=True)
+    Name = models.CharField(max_length=30, null=True, blank=True)
     School = models.CharField(max_length=30, choices=SCHOOLS, default="信息技术与科学学院")
     Class = models.ForeignKey(to="ReaderClass", on_delete=models.SET_DEFAULT, default="A")
-    Type = models.CharField(max_length=10, default='学生')
+    Type = models.CharField(max_length=10, choices=[('1', '学生'), ('2', '教职工')],  default='学生')
 
     def __str__(self):
-        return self.StudentID
+        return self.ReaderID
 
 
 class Fine(models.Model):
@@ -170,13 +173,13 @@ class Fine(models.Model):
 class Borrow(models.Model):
     """
     借阅记录类
-    主键 学号 StudentID &&  图书编号 BookID
-    外键 学号 StudentID &&  图书编号 BookID
+    主键 学号 ReaderID &&  图书编号 BookID
+    外键 学号 ReaderID &&  图书编号 BookID
     借书时间 BorrowTime 还书日期 returnTime
     续借状态 isReBorrowed
     """
-    StudentID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
-    BookID = models.ForeignKey(to="Book", on_delete=models.DO_NOTHING)
+    ReaderID = models.ForeignKey(to="Reader", on_delete=models.CASCADE)
+    BookID = models.ForeignKey(to="Book", on_delete=models.CASCADE)
     BorrowTime = models.DateField(auto_now_add=True)
     ReturnDay = models.DateField(auto_now_add=True)
     isReBorrowed = models.BooleanField(default=False)
@@ -184,7 +187,7 @@ class Borrow(models.Model):
     isAllowed = models.NullBooleanField(null=True)
 
     def __str__(self):
-        return "学生%s借了%s书" % (self.StudentID, self.BookID)
+        return "学生%s借了%s书" % (self.ReaderID, self.BookID)
 
 
 class BuyIn(models.Model):
@@ -204,7 +207,7 @@ class Message(models.Model):
         ('2', '未读')
     ]
     Title = models.CharField(max_length=255, verbose_name='消息标题')
-    StudentID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
+    ReaderID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
     Content = models.TextField()
     MTime = models.DateTimeField(auto_now_add=True)
     Status = models.CharField(max_length=20, choices=STATUS, default="未读")

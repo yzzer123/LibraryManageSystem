@@ -4,7 +4,14 @@
       <w>adminlte</w>
       <w>buct</w>
       <w>easyicon</w>
+      <w>infmdf</w>
       <w>navbar</w>
+      <w>newpwd</w>
+      <w>newpwderr</w>
+      <w>oldpwd</w>
+      <w>pwderr</w>
+      <w>renewpwd</w>
+      <w>renewpwderr</w>
     </words>
   </dictionary>
 </component>

@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Reader',
             fields=[
-                ('StudentID', models.CharField(db_index=True, max_length=30, primary_key=True, serialize=False)),
+                ('ReaderID', models.CharField(db_index=True, max_length=30, primary_key=True, serialize=False)),
                 ('Gender', models.CharField(choices=[('1', '男'), ('2', '女'), ('3', '保密')], default='保密', max_length=10)),
                 ('SName', models.CharField(max_length=30, null=True)),
                 ('School', models.CharField(choices=[('1', '信息技术与科学学院'), ('2', '材料科学与工程学院'), ('3', '机电工程学院'), ('4', '化学工程学院'), ('5', '经济管理学院'), ('6', '化学学院'), ('7', '数理学院'), ('8', '文法学院'), ('9', '生命科学与技术学院'), ('10', '继续教育学院'), ('11', '马克思主义学院'), ('12', '国际教育学院'), ('13', '侯德榜工程师学院'), ('14', '巴黎居里工程师学院')], default='信息技术与科学学院', max_length=30)),
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 ('Content', models.TextField()),
                 ('MTime', models.DateTimeField(auto_now_add=True)),
                 ('Status', models.CharField(choices=[('1', '已读'), ('2', '未读')], default='未读', max_length=20)),
-                ('StudentID', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='BuctLib.Reader')),
+                ('ReaderID', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='BuctLib.Reader')),
             ],
         ),
         migrations.CreateModel(
@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
                 ('isReBorrowed', models.BooleanField(default=False)),
                 ('isDelete', models.BooleanField(default=False)),
                 ('BookID', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='BuctLib.Book')),
-                ('StudentID', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='BuctLib.Reader')),
+                ('ReaderID', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='BuctLib.Reader')),
             ],
         ),
     ]

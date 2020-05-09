@@ -4,6 +4,7 @@ from BuctLib.models import *
 from BuctLib.src.formCheck import *
 from django.db.models import Q
 import os
+from .forms import *
 
 AccountID = None
 AccountType = False
@@ -12,7 +13,11 @@ UserAccount = None  # 登陆的账户
 
 
 def hello(request):
-    return HttpResponse("<h1>Hello BUCT Library</h1>")
+    content = {
+        LoginUser: LoginUser,
+        UserAccount: UserAccount,
+    }
+    return render(request, "student/information/information-mdf.html", content)
 
 
 def loginpage(request):
@@ -57,7 +62,7 @@ def logincheck(request):
         # 如果有这个账户
         if pswd == search_result[0].Password:
             # 密码正确
-            print(search_result[0].Type)
+
             if search_result[0].Type == "2":
                 # 查读者表
                 AccountID = search_result[0].AccountID
@@ -181,13 +186,13 @@ def registerCheck(request):
     reader = None
     manager = None
     if Type == '2':
-        search = Reader.objects.filter(StudentID=ID)
+        search = Reader.objects.filter(ReaderID=ID)
         if len(search) > 0:
             content["isIdERR"] = True
             content["IdERR"] = "学号已被注册"
             return render(request, "register.html", content)
         user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
-        reader = Reader.objects.create(StudentID=ID, AccountID=user)
+        reader = Reader.objects.create(ReaderID=ID, AccountID=user)
         reader.save()
         user.save()
     else:
@@ -209,7 +214,7 @@ def readerindex(request):
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
 
-    return render(request, "index.html", {LoginUser: LoginUser, UserAccount: UserAccount})
+    return render(request, "index.html", {"LoginUser": LoginUser, "UserAccount": UserAccount, })
 
 
 def page404(request):
@@ -223,7 +228,9 @@ def jump(request):
 def pwdmdf(request):
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
-    return render(request, "student/information/pwd-mdf.html", {LoginUser: LoginUser, UserAccount: UserAccount})
+    return render(request, "student/information/pwd-mdf.html",
+                  {"mdfpwdState": "active", "InfState": "active", "OpenInf": "menu-open", "LoginUser": LoginUser,
+                   "UserAccount": UserAccount})
 
 
 def checkpwd(request):
@@ -231,30 +238,76 @@ def checkpwd(request):
         return render(request, "page404.html")
     content = {
         LoginUser: LoginUser, UserAccount: UserAccount,
-
+        "mdfpwdState": "active", "InfState": "active", "OpenInf": "menu-open",
     }
     oldpwd = request.POST.get("old_pwd")
     newpwd = request.POST.get("new_pwd")
     renewpwd = request.POST.get("renew_pwd")
     if oldpwd != UserAccount.Password:
-        content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+        content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
         content["pwderr"] = "原密码错误"
         return render(request, "student/information/pwd-mdf.html", content)
     else:
         err = check_pwd(newpwd)
         if err != "":
-            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
             content["newpwderr"] = err
             return render(request, "student/information/pwd-mdf.html", content)
         elif newpwd == oldpwd:
-            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
             content["newpwderr"] = "与原密码相同"
             return render(request, "student/information/pwd-mdf.html", content)
         elif renewpwd != newpwd:
-            content["oldpwd"], content["newpwd"], content["renew_pwd"] = oldpwd, newpwd, renewpwd
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
             content["renewpwderr"] = "密码不一致"
             return render(request, "student/information/pwd-mdf.html", content)
     UserAccount.Password = newpwd
     UserAccount.save()
     content["work"] = "work"
     return render(request, "student/information/pwd-mdf.html", content)
+
+
+def infmdf(request):
+    global AccountID, LoginUser, UserAccount
+    # LoginUser: Reader
+    # UserAccount: User
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "mdfInfState": "active", "InfState": "active"
+    }
+    if request.method == "POST":
+        form = ReadInfForm(request.POST)
+        if form.is_valid():
+            content["work"] = "work"  # 数据合法
+            UserAccount.Email = form.cleaned_data["Email"]
+            UserAccount.Tel = form.cleaned_data["Tel"]
+            LoginUser.Gender = form.cleaned_data["Gender"]
+            LoginUser.Name = form.cleaned_data["Name"]
+            LoginUser.School = form.cleaned_data["School"]
+            LoginUser.Type = form.cleaned_data["Type"]
+            LoginUser.save()
+            UserAccount.save()
+            content["form"] = ReadInfForm(
+                initial={"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
+                         "ReaderID": LoginUser.ReaderID,
+                         "Gender": LoginUser.Gender,
+                         "Name": LoginUser.Name,
+                         "School": LoginUser.School,
+                         "Class": LoginUser.Class,
+                         "Type": LoginUser.Type
+                         })
+        else:
+            content["form"] = form
+    else:
+        form = ReadInfForm(initial={"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
+                                    "ReaderID": LoginUser.ReaderID,
+                                    "Gender": LoginUser.Gender,
+                                    "Name": LoginUser.Name,
+                                    "School": LoginUser.School,
+                                    "Class": LoginUser.Class,
+                                    "Type": LoginUser.Type
+                                    })
+        content["form"] = form
+    return render(request, "student/information/information-mdf.html", content)
