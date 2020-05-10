@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import widgets
-
-from BuctLib.models import *
+from .src.formCheck import *
+from BuctLib.models import User, Manager, ReaderClass, Reader, GENDER_CHOICE, SCHOOLS
 #   修改信息表单
 from .src.formCheck import *
 
@@ -11,7 +11,7 @@ class ReadInfForm(forms.Form):
                           required=True,
                           min_length=11,
                           widget=widgets.TextInput(
-                              attrs={'class': 'form-control', "data-inputmask": '"mask":"999-9999-9999"',
+                              attrs={'class': 'form-control', "data-inputmask": '"mask":"99999999999"',
                                      "data-mask": ""}),
                           error_messages={
                               'required': "电话号码不能为空",
@@ -38,6 +38,7 @@ class ReadInfForm(forms.Form):
     School = forms.TypedChoiceField(label="学院", choices=SCHOOLS,
                                     widget=widgets.Select(attrs={"class": 'form-control select2'}),
                                     empty_value="信息技术与科学学院")
+    # 根据读者等级字段来查表生成选择选项
     Class = forms.TypedChoiceField(label="级别", disabled=True, required=False,
                                    choices=map(lambda item: (item["Class"], item["Class"]),
                                                ReaderClass.objects.values()),
@@ -46,8 +47,39 @@ class ReadInfForm(forms.Form):
     Type = forms.TypedChoiceField(label="类别", choices=[('1', '学生'), ('2', '教职工')], empty_value="学生",
                                   widget=widgets.Select(attrs={"class": "form-control select5"}))
 
+    def clean(self):
+        changed_datas = self.changed_data
+        # 电话号码和邮箱需要验证唯一性
+        if "Tel" in changed_datas:
+            Tel = self.cleaned_data.get("Tel")
+            if len(Tel) < 11 or '_' in Tel:
+                raise forms.ValidationError({"Tel": '电话号码长度至少11位'})
+            else:
+                if User.objects.filter(Tel=Tel).exists():
+                    raise forms.ValidationError({"Tel": '电话号码已存在'})
+        if "Email" in changed_datas:
+            Email = self.cleaned_data.get("Email")
+            errors = check_email(Email)
+            if errors != "":
+                raise forms.ValidationError({"Email": errors})
+            else:
+                if User.objects.filter(Email=Email).exists():
+                    raise forms.ValidationError({"Email": '邮箱已存在'})
 
-class ReaderForm(forms.ModelForm):
-    class Meta:
-        model = Reader
-        fields = ["ReaderID", "AccountID", "Gender", "Name", "School", "Class", "Type"]
+        return self.cleaned_data
+
+
+# class ReaderForm(forms.ModelForm):
+#     class Meta:
+#         model = Reader
+#         fields = ["ReaderID", "AccountID", "Gender", "Name", "School", "Class", "Type"]
+
+class ApplyChangeClass(forms.Form):
+    ReaderID = forms.CharField(label="读者卡号", max_length=30, disabled=True, required=False,
+                               widget=widgets.TextInput(attrs={"class": "form-control"}))
+    Class = forms.TypedChoiceField(label="级别", required=False,
+                                   choices=map(lambda item: (item["Class"], item["Class"]+"----------------------------可借%d本" % (item["Limited"])),
+                                               ReaderClass.objects.values()),
+                                   widget=widgets.Select(attrs={"class": "form-control select3"}))
+    Message = forms.ChoiceField(label="备注",required=False, widget=forms.Textarea(attrs={"class": "form-control"}))
+

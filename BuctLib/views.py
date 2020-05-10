@@ -277,8 +277,15 @@ def infmdf(request):
         "LoginUser": LoginUser, "UserAccount": UserAccount,
         "OpenInf": "menu-open", "mdfInfState": "active", "InfState": "active"
     }
+    initial_form = {"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
+                                    "ReaderID": LoginUser.ReaderID,
+                                    "Gender": LoginUser.Gender,
+                                    "Name": LoginUser.Name,
+                                    "School": LoginUser.School,
+                                    "Class": LoginUser.Class,
+                                    "Type": LoginUser.Type}
     if request.method == "POST":
-        form = ReadInfForm(request.POST)
+        form = ReadInfForm(request.POST, initial=initial_form)
         if form.is_valid():
             content["work"] = "work"  # 数据合法
             UserAccount.Email = form.cleaned_data["Email"]
@@ -301,13 +308,19 @@ def infmdf(request):
         else:
             content["form"] = form
     else:
-        form = ReadInfForm(initial={"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
-                                    "ReaderID": LoginUser.ReaderID,
-                                    "Gender": LoginUser.Gender,
-                                    "Name": LoginUser.Name,
-                                    "School": LoginUser.School,
-                                    "Class": LoginUser.Class,
-                                    "Type": LoginUser.Type
-                                    })
+        form = ReadInfForm(initial=initial_form)
         content["form"] = form
     return render(request, "student/information/information-mdf.html", content)
+
+
+def apllyclass(request):
+    global AccountID, LoginUser, UserAccount
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "applyState": "active"
+    }
+    initialForm = {
+        "ReaderID": LoginUser.ReaderID, "Class": LoginUser.Class
+    }
+    content["form"] = ApplyChangeClass(initial=initialForm)
+    return render(request, "student/information/applyClass.html", content)

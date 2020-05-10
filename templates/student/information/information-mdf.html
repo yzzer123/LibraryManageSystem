@@ -28,7 +28,7 @@
 
     {% csrf_token %}
       <!-- Input addon -->
-            <div class="card card-info">
+            <div class="card card-info " style="margin-top: -20px">
               <div class="card-header  gradient-color-her">
                 <h3 class="font-weight-light" style="color: #0b2e13">修改个人信息</h3>
               </div>
@@ -64,6 +64,7 @@
                                   <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Tel.errors }}</span>
 
                               </div>
+                          </div>
                               <!-- /.input group -->
                               <div class="form-group">
                               <label for="{{ form.Email.id_for_label }}">邮箱:</label>
@@ -77,7 +78,7 @@
                               </div>
                               </div>
                         </div>
-                      </div>
+
                       <div class="col-sm-5"><!--右侧一列-->
 
                       <div class="form-group">
