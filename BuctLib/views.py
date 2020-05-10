@@ -17,7 +17,7 @@ def hello(request):
         LoginUser: LoginUser,
         UserAccount: UserAccount,
     }
-    return render(request, "student/information/information-mdf.html", content)
+    return render(request, "model/base.html", content)
 
 
 def loginpage(request):
