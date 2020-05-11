@@ -2,12 +2,16 @@
   <dictionary name="13055">
     <words>
       <w>adminlte</w>
+      <w>allowbooks</w>
       <w>buct</w>
       <w>easyicon</w>
       <w>infmdf</w>
       <w>navbar</w>
+      <w>newbook</w>
       <w>newpwd</w>
       <w>newpwderr</w>
+      <w>nullallowed</w>
+      <w>nullbooks</w>
       <w>oldpwd</w>
       <w>pwderr</w>
       <w>renewpwd</w>

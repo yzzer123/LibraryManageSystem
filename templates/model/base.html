@@ -7,7 +7,9 @@
     <!-- 图标库 -->
     <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="/static/fontawesome-free/css/all.min.css">
- <!-- Ionicons -->
+    {% block StyleSheet %}
+    {% endblock %}
+    <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- daterange picker -->
   <link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker.css">
@@ -53,99 +55,25 @@
       <!-- 消息按钮 -->
       <li class="nav-item dropdown hoverColor">
           {% block mes %}
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
+        <a class="nav-link" data-toggle="dropdown" href="#" id="MesBtn">
+          <i class="far fa-comments" style="color: #007d65"></i>
         </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="#" class="dropdown-item">
-            <!-- 消息列表项1-->
-            <div class="media">
-              <img src="/static/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="MesBox">
+            <div id="Mes">
+
             </div>
-            <!-- 消息列表项1结束 -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- 消息列表项2 -->
-            <div class="media">
-              <img src="/static/dist/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  John Pierce
-                  <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">I got your message bro</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- 消息列表项2结束 -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- 消息列表项3 -->
-            <div class="media">
-              <img src="/static/dist/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Nora Silvester
-                  <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">The subject goes here</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- 消息列表项3结束-->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
         </div>
         {%  endblock %}
       </li>
-      <!-- 公告消息 -->
+      <!-- 登出按钮 -->
       <li class="nav-item dropdown hoverColor">
-          {% block notice %}
-
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-header">15 Notifications</span>
-            <!--1-->
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-            <!--2-->
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-            <!--3-->
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
-          {% endblock %}
+            <a class="nav-link" href="#" id="login-out" role="button"><i
+            class="fa fa-sign-out-alt" style="color: #b92c28"></i></a>
       </li>
+        <!--显示已选择图书-->
       <li class="nav-item hoverColor">
-        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button"><i
-            class="fas fa-th-large"></i></a>
+        <a class="nav-link" data-widget="control-sidebar" id="getbooks" data-slide="true" href="#" role="button"><i
+            class="fas fa-th-large" style="color: #009ad6"></i></a>
       </li>
     </ul>
   </nav>
@@ -169,7 +97,7 @@
           <a href="#" class="d-block margin-left-name font-weight-light user-name-font">{{ LoginUser.Name }}</a>
         </div>
       </div>
-        <button type="button" id="login-out" class="btn  btn-danger login-out-btn">登出</button>
+
       <!-- 按钮菜单 -->
       <nav class="mt-2">
           <!--父列表 -->
@@ -310,21 +238,26 @@
   <!-- /.内容容器 -->
 
   <!-- 右部控制面板 -->
-  <aside class="control-sidebar control-sidebar-dark">
+  <aside class="control-sidebar control-sidebar-dark elevation-4"  id="right-control" style="width: 300px"  >
     <!-- 右部控制面板 快速显示未审核的书籍-->
-    <div class="p-3">
-      <h5>已选书籍</h5>
-      {% block choseBook %}
-        {%  endblock  %}
+    <div class="p-3" style="overflow-y: scroll;max-height: 100%;">
+      <h5 style="margin-bottom:20px ">未审核借阅书籍</h5>
+      <div id="nullborrow" style="margin: 10px 0px 10px">
+
+      </div>
+        <h5 style="margin-bottom:20px ">在借书籍</h5>
+        <div id="allowborrow" style="margin: 10px 0px 10px">
+
+        </div>
     </div>
   </aside>
   <!-- /.右部控制面板 -->
 
 
   <!-- 底部内容 -->
-  <footer class="main-footer">
+  <footer class="main-footer" >
     <!-- 左侧 -->
-    <div class="float-right d-none d-sm-inline">
+    <div class="float-right d-none d-sm-inline" >
       @buct
     </div>
     <!-- Default to the left -->
@@ -340,18 +273,140 @@
         document.getElementById("login-out").onclick = function () {
             window.location.href = "/loginout/";
         }
-        $("#Menu").click(function () {
-            var btn = $("#login-out");
-            if(btn.is(":hidden")) {
-                btn.show()
-            }else{
-                btn.hide()
-            }
 
+        const bottom_message = `<a href="#" class="dropdown-item dropdown-footer" id="clearMes">See All Messages</a>`
+
+        $("#MesBtn").click(function () {
+            if($("#MesBox").is(":hidden")){
+                $("#Mes").html("")
+                $.ajax({
+                    url : "/getmessage/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {way:"get"},//提交的数据
+                    success : function (data) {
+                        if (data.length > 0){
+                            for(let i of data){
+                                $("#Mes").append(`
+                                    <a href="#" class="dropdown-item">
+                                    <div class="media">
+                                     <div class="media-body">
+                                        <h3 class="dropdown-item-title">
+                                          ${i.Title}
+                                          <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+                                        </h3>
+                                        <p class="text-sm">${i.Content}</p>
+                                        <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> ${i.MTime}</p>
+                                      </div>
+                                    </div>
+                                  </a>
+                                  <div class="dropdown-divider"></div>`)
+                            }
+                        }else {
+                             $("#Mes").append(`
+                                    <a href="#" class="dropdown-item">
+                                    <div class="media">
+                                     <div class="media-body">
+                                        <h3 class="dropdown-item-title">
+                                            全部消息已读
+                                          <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+                                        </h3>
+                                        </div>
+                                    </div>
+                                  </a>
+                                  <div class="dropdown-divider"></div>`)
+                        }
+                         $("#Mes").append(bottom_message)
+                        $("#clearMes").click(function () {
+                             $.ajax({
+                                    url : "/getmessage/",    //提交URL
+                                    type : "GET",//处理方式
+                                    data : {way:"reset"},//提交的数据
+                                    success : function (data) {
+                                         if (data === "ok"){
+                                            $("#Mes").html(bottom_message)
+
+                                         }
+                                    },//执行成功后的回调函
+                                    error : function() {
+                                        alert("请求失败！")
+                                    }
+                                    })
+                            })
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("请求失败！")
+                    }
+                })
+            }
         })
+
+        $("#getbooks").click(function () {
+            if($("#right-control").is(":hidden")){
+                $("#nullborrow").html("");
+                $("#allowborrow").html("");
+                $.ajax({
+                    url: "/getborrow/",
+                    type: "GET",
+                    data:{way:"get"},
+                    success:function (data) {
+
+                        for(let i = 0; i < data.allowbooks.length; i++){
+                            $("#allowborrow").append(`
+                            <div id="allow${i}" class="row tran" style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
+                                    <div class="col-sm-12" style="text-align:center; background-color: #33a3dc; padding: 10px; border-radius: 15px;" >
+                                            <h6 >书名:${data.allowbooks[i].BName}</h6>
+                                            <h6 >作者:${data.allowbooks[i].Author}</h6>
+                                            <h6 >出版社:${data.allowbooks[i].Publisher}</h6>
+                                    </div>
+
+                            </div>
+                            `);
+                        }
+                            for(let i = 0; i < data.nullbooks.length; i++){
+                            $("#nullborrow").append(`
+                            <div id="null${i}" class="row tran" style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
+                                    <div class="col-sm-9" style="background-color: #50b8c1; padding: 10px; border-bottom-left-radius: 15px;border-top-left-radius: 15px" >
+                                            <h6 >书名:${data.nullbooks[i].BName}</h6>
+                                            <h6 >作者:${data.nullbooks[i].Author}</h6>
+                                            <h6 >出版社:${data.nullbooks[i].Publisher}</h6>
+                                    </div>
+                                    <div class="col-sm-3" style="border-bottom-right-radius: 15px;border-top-right-radius: 15px;background-color:#f391a9;cursor: pointer;">
+                                            <h5 class="font-weight-bold" style="margin-top: 70%" id="nullbook${data.nullbooks[i].id}">撤销</h5>
+                                    </div>
+                            </div>
+                            `);
+                            $(`#nullbook${data.nullbooks[i].id}`).click(function () {
+                                    let id = data.nullbooks[i].id;
+
+                                    $.ajax ({
+                                        url: "/getborrow/",
+                                        type: "GET",
+                                        data:{way:"reset",id:id},
+                                        success:function () {
+                                            $(`#null${i}`).hide();
+
+                                        },
+                                        error:function () {
+                                            alert("撤销失败");
+                                        }
+                                    })
+                            })
+                        }
+
+                    },
+                    error:function () {
+                        alert("请求失败！")
+                    }
+                })
+            }
+        })
+
+
     }
 </script>
 {% block script %}
+{% endblock %}
+{% block moreJSLib %}
 {% endblock %}
 <!-- Bootstrap 4 -->
 <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>

@@ -78,10 +78,10 @@ class ApplyChangeClass(forms.Form):
     ReaderID = forms.CharField(label="读者卡号", max_length=30, disabled=True, required=False,
                                widget=widgets.TextInput(attrs={"class": "form-control"}))
     Class = forms.ChoiceField(label="级别", required=False,
-                                   choices=map(lambda item: (item["Class"], item["Class"]+"----------------------------可借%d本" % (item["Limited"])),
+                                   choices=map(lambda item: (item["Class"], item["Class"]+"-------------------------可借%d本---------------------借阅时间上限%d天" % (item["Limited"], item["Days"])),
                                                ReaderClass.objects.values()),
                                    widget=widgets.Select(attrs={"class": "form-control select3"}))
-    Message = forms.CharField(label="备注", empty_value="",required=False, widget=forms.Textarea(attrs={"class": "form-control"}))
+    Message = forms.CharField(label="备注", empty_value="", required=False, widget=forms.Textarea(attrs={"class": "form-control"}))
 
     def clean(self):
 

@@ -56,7 +56,7 @@ class FineAdmin(admin.ModelAdmin):
 
 class ReaderClassAdmin(admin.ModelAdmin):
     list_display = [
-        "Class", "Limited"
+        "Class", "Limited", "Days"
     ]
 
 

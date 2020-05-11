@@ -84,3 +84,13 @@
 .pwd-smt-bnt{
   width: 200px;
 }
+::-webkit-scrollbar{
+  display: none;
+}
+.tran{
+  transition: background-color 1000ms linear 500ms;
+-o-transition: background-color 1000ms linear 500ms; /*兼容parsto内核*/
+-moz-transition: background-color 1000ms linear 500ms; /*兼容gecko内核*/
+-webkit-transition: background-color 1000ms linear 500ms; /*兼容webkit内核*/
+
+}

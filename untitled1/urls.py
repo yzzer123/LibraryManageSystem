@@ -34,7 +34,9 @@ urlpatterns = (
     path(r'jump/', views.jump),
     path(r'resetApply/',views.resetapply),
     path(r'checkpwd/', views.checkpwd),
+    path(r'getmessage/', views.getmessage),
     path(r'applyclass/', views.apllyclass),
+    path(r'getborrow/', views.getborrow),
     url(r'infomdf/', views.infmdf, name="modify information"),
     url(r'favicon.ico/', RedirectView.as_view(url=r'/static/img/icons/lib.svg')),
 

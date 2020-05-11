@@ -1,5 +1,7 @@
+# from datetime import datetime
+
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from BuctLib.models import *
 from BuctLib.src.formCheck import *
 from django.db.models import Q
@@ -214,7 +216,7 @@ def readerindex(request):
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
 
-    return render(request, "index.html", {"LoginUser": LoginUser, "UserAccount": UserAccount, })
+    return render(request, "studentindex.html", {"LoginUser": LoginUser, "UserAccount": UserAccount, })
 
 
 def page404(request):
@@ -358,3 +360,52 @@ def resetapply(request):
         return HttpResponse("已撤销全部申请")
     else:
         return None
+
+
+def getmessage(request):
+    global LoginUser
+    # 获取消息
+    if request.method == "GET" and request.GET.get("way") == "get":
+        res = Message.objects.filter(ReaderID=LoginUser.ReaderID, Status="未读").order_by("-MTime").values()
+        for item in res:
+            item["MTime"] = item["MTime"].strftime('%Y-%m-%d %H:%M:%S')
+        # print(datetime.datetime.now())
+        return JsonResponse(list(res), safe=False)
+    # 标志已读
+    elif request.method == "GET" and request.GET.get("way") == "reset":
+        res = Message.objects.filter(ReaderID=LoginUser.ReaderID, Status="未读")
+        for item in res:
+            item.Status = "已读"
+            item.save()
+        return HttpResponse("ok")
+    else:
+        return None
+
+
+def getborrow(request):
+    global LoginUser
+    # 请求借书的数据
+    if request.method == "GET" and request.GET.get("way") == "get":
+        nullallowed_books = []
+        allowed_books = []
+        # 查阅未审核记录
+        nullallowed_borrow = Borrow.objects.filter(
+            Q(ReaderID=LoginUser.ReaderID) & Q(isDelete=False) & Q(isAllowed__isnull=True))
+        for item in nullallowed_borrow:
+            newbook = {"id": item.id, "BookID": item.BookID.BookID, "BName": item.BookID.BName,
+                       "Author": item.BookID.Author, "Publisher": item.BookID.Publisher}
+            nullallowed_books.append(newbook)
+        # 查阅已借记录
+        allowed_borrow = Borrow.objects.filter(
+            Q(ReaderID=LoginUser.ReaderID) & Q(isDelete=False) & Q(isAllowed=True))
+        for item in allowed_borrow:
+            newbook = {"id": item.id, "BookID": item.BookID.BookID, "BName": item.BookID.BName,
+                       "Author": item.BookID.Author, "Publisher": item.BookID.Publisher}
+            allowed_books.append(newbook)
+        return JsonResponse({"nullbooks": list(nullallowed_books), "allowbooks": list(allowed_books)}, safe=False)
+    # 删除未审核的借书记录
+    elif request.method == "GET" and request.GET.get("way") == "reset":
+        res = Borrow.objects.get(id=request.GET.get("id"))
+        res.delete()
+        return HttpResponse("ok")
+    return None

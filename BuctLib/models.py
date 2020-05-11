@@ -130,9 +130,11 @@ class ReaderClass(models.Model):
     读者级别类
     Class为级别
     Limited为可借阅数量
+    Day为借阅天数
     """
     Class = models.CharField(max_length=4, primary_key=True, db_index=True)
     Limited = models.PositiveSmallIntegerField(default=3)
+    Days = models.PositiveSmallIntegerField(default=30, null=True)
 
     def __str__(self):
         return self.Class

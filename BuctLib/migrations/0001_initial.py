@@ -56,6 +56,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('Class', models.CharField(db_index=True, max_length=4, primary_key=True, serialize=False)),
                 ('Limited', models.PositiveSmallIntegerField(default=3)),
+
             ],
         ),
         migrations.CreateModel(
