@@ -1,0 +1,49 @@
+{% extends "model/base.html" %}
+{% block title %}
+    申请读者级别变更
+{%  endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            // 初始化 select组件样式
+
+            $('.select3').select2()
+            $('.select2bs4').select2({
+              theme: 'bootstrap4'
+            })
+
+            // 申请已发送
+            if("{{ work }}" === "work"){
+             setTimeout(function () {
+                    alert("申请已发送");
+             },200)
+         }
+        })
+    </script>
+{% endblock %}
+{% block content %}
+    <form action="/applyclass/" method="POST">
+
+    {% csrf_token %}
+      <!-- Input addon -->
+            <div class="card card-info " style="margin-top: -20px">
+              <div class="card-header  gradient-color-her">
+                <h3 class="font-weight-light" style="color: #0b2e13">申请读者级别变更</h3>
+              </div>
+              <div class="card-body">
+
+                  <div class="row"> <!--排版整个表单的row-->
+                      {{ form }}
+
+                  </div>
+                  <!--提交按钮-->
+                <div class="card-footer row " style="background-color: white">
+                  <button type="submit" id="pwd-smt"  class="btn btn-primary   pwd-smt-bnt">申请</button>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+     </form>
+{% endblock %}
