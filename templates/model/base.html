@@ -29,7 +29,7 @@
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <title>{% block title %}My amazing site{% endblock %}</title>
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
 <!-- 头部导航 -->
   <nav class="main-header navbar navbar-expand gradient-color-her navbar-light">
     <!-- 头部左侧导航-->
@@ -169,7 +169,7 @@
           <a href="#" class="d-block margin-left-name font-weight-light user-name-font">{{ LoginUser.Name }}</a>
         </div>
       </div>
-
+        <button type="button" id="login-out" class="btn  btn-danger login-out-btn">登出</button>
       <!-- 按钮菜单 -->
       <nav class="mt-2">
           <!--父列表 -->
@@ -272,7 +272,7 @@
       </nav>
       <!-- /.菜单栏结束-->
     </div>
-      <button type="button" id="login-out" class="btn  btn-danger login-out-btn">登出</button>
+
     <!-- /.左侧菜单栏结束 -->
   </aside>
 

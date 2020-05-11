@@ -278,12 +278,12 @@ def infmdf(request):
         "OpenInf": "menu-open", "mdfInfState": "active", "InfState": "active"
     }
     initial_form = {"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
-                                    "ReaderID": LoginUser.ReaderID,
-                                    "Gender": LoginUser.Gender,
-                                    "Name": LoginUser.Name,
-                                    "School": LoginUser.School,
-                                    "Class": LoginUser.Class,
-                                    "Type": LoginUser.Type}
+                    "ReaderID": LoginUser.ReaderID,
+                    "Gender": LoginUser.Gender,
+                    "Name": LoginUser.Name,
+                    "School": LoginUser.School,
+                    "Class": LoginUser.Class,
+                    "Type": LoginUser.Type}
     if request.method == "POST":
         form = ReadInfForm(request.POST, initial=initial_form)
         if form.is_valid():
@@ -315,12 +315,46 @@ def infmdf(request):
 
 def apllyclass(request):
     global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
         "OpenInf": "menu-open", "InfState": "active", "applyState": "active"
     }
     initialForm = {
-        "ReaderID": LoginUser.ReaderID, "Class": LoginUser.Class
+        "ReaderID": LoginUser.ReaderID, "Class": LoginUser.Class.Class, "Message": ""
     }
-    content["form"] = ApplyChangeClass(initial=initialForm)
+    if request.method == "POST":
+        form = ApplyChangeClass(request.POST, initial=initialForm)
+        if form.is_valid():
+            content["work"] = "work"
+            for item in ApplyClass.objects.filter(ReaderID=LoginUser.ReaderID):
+                item.delete()
+            apply_text = form.cleaned_data["Message"]
+            apply_class = form.cleaned_data["Class"]
+            apply = ApplyClass.objects.create(ReaderID=LoginUser, Class=ReaderClass.objects.get(Class=apply_class),
+                                              Message=apply_text)
+            apply.save()
+            content["form"] = ApplyChangeClass(initial=initialForm)
+            m = Message.objects.create(Title="级别变更申请", ReaderID=LoginUser,
+                                       Content="您申请将读者级别变更为%s级的请求已经提交，管理员会尽量在三个工作日内处理申请" % apply_class)
+            m.save()
+        else:
+            content["form"] = form
+    else:
+        content["form"] = ApplyChangeClass(initial=initialForm)
+    if ApplyClass.objects.filter(ReaderID=LoginUser.ReaderID).exists():
+        content["resetApply"] = True
     return render(request, "student/information/applyClass.html", content)
+
+
+def resetapply(request):
+    global LoginUser
+    if request.method == "GET":
+        for item in ApplyClass.objects.filter(ReaderID=LoginUser.ReaderID):
+            item.delete()
+        m = Message.objects.create(Title="撤销级别变更申请", ReaderID=LoginUser, Content="您的读者级别变更申请已被撤销")
+        m.save()
+        return HttpResponse("已撤销全部申请")
+    else:
+        return None

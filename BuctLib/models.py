@@ -170,6 +170,17 @@ class Fine(models.Model):
     FineMoney = models.PositiveSmallIntegerField(default=10)
 
 
+class ApplyClass(models.Model):
+    """
+        借阅记录类
+        主键 默认id
+        外键 class 申请的级别 ReaderID 申请的读者ID号
+    """
+    Class = models.ForeignKey(to="ReaderClass", on_delete=models.CASCADE)
+    ReaderID = models.ForeignKey(to="Reader", on_delete=models.CASCADE)
+    Message = models.TextField(default="")
+
+
 class Borrow(models.Model):
     """
     借阅记录类
@@ -207,7 +218,7 @@ class Message(models.Model):
         ('2', '未读')
     ]
     Title = models.CharField(max_length=255, verbose_name='消息标题')
-    ReaderID = models.ForeignKey(to="Reader", on_delete=models.DO_NOTHING)
+    ReaderID = models.ForeignKey(to="Reader", on_delete=models.CASCADE)
     Content = models.TextField()
     MTime = models.DateTimeField(auto_now_add=True)
     Status = models.CharField(max_length=20, choices=STATUS, default="未读")

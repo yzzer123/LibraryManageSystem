@@ -32,6 +32,7 @@ urlpatterns = (
     path(r'registercheck/', views.registerCheck),
     path(r'404/', views.page404),
     path(r'jump/', views.jump),
+    path(r'resetApply/',views.resetapply),
     path(r'checkpwd/', views.checkpwd),
     path(r'applyclass/', views.apllyclass),
     url(r'infomdf/', views.infmdf, name="modify information"),

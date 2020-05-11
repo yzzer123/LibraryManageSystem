@@ -32,6 +32,12 @@ class ManagerAdmin(admin.ModelAdmin):
     ]
 
 
+class ApplyAdmin(admin.ModelAdmin):
+    list_display = [
+        "ReaderID", "Class", "Message"
+    ]
+
+
 class ReaderAdmin(admin.ModelAdmin):
     """
     读者管理类
@@ -92,3 +98,4 @@ admin.site.register(Message, MessageAdmin)
 admin.site.register(Notice, NoticeAdmin)
 admin.site.register(ReaderClass, ReaderClassAdmin)
 admin.site.register(Fine, FineAdmin)
+admin.site.register(ApplyClass, ApplyAdmin)
