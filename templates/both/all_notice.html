@@ -1,0 +1,47 @@
+{%  extends "model/base.html" %}
+{% block title %} 所有公告 {% endblock %}
+<!--JS代码-->
+{% block script %}
+
+{% endblock %}
+<!--css代码-->
+{% block StyleSheet %}
+{%  endblock %}
+
+{% block content %}
+    <div class="row">
+          <div class="col-md-12">
+            <!-- The time line -->
+            <div class="timeline">
+              {% for item in notices %}
+                  <!--年加月份-->
+              <div class="time-label">
+                <span class="bg-red">{{ item.YM }}</span>
+              </div>
+              <!--每个项-->
+                  {% for notice in item.notices %}
+              <div>
+                <i class="fas fa-bullhorn bg-blue"></i>
+                <div class="timeline-item">
+                  <span class="time"><i class="fas fa-clock"></i> {{ notice.NTime }}</span>
+                  <h3 class="timeline-header">阅读次数： {{ notice.ReadTimes }}</h3>
+
+                  <div class="timeline-body">
+                        <h4 class="font-weight-bold">{{ notice.Title }}</h4>
+                  </div>
+                  <div class="timeline-footer">
+                    <a class="btn btn-primary btn-sm" href="{% url 'noticepage' notice.id %}">阅读</a>
+
+                  </div>
+                </div>
+              </div>
+                      {% endfor %}
+             {% endfor %}
+              <div>
+                <i class="fas fa-clock bg-gray"></i>
+              </div>
+            </div>
+          </div>
+          <!-- /.col -->
+        </div>
+{% endblock %}

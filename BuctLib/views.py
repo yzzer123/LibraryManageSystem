@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse
 from BuctLib.models import *
 from BuctLib.src.formCheck import *
-from django.db.models import Q
+from django.db.models import Q, Count
 import os
 from .forms import *
 
@@ -215,8 +215,10 @@ def readerindex(request):
 
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
-
-    return render(request, "studentindex.html", {"LoginUser": LoginUser, "UserAccount": UserAccount, })
+    books = Book.objects.all().order_by('-ReadTimes')[:5]
+    notices = Notice.objects.all().order_by('-NTime')[:5]
+    return render(request, "student/studentindex.html",
+                  {"LoginUser": LoginUser, "UserAccount": UserAccount, "books": books, "notices": notices})
 
 
 def page404(request):
@@ -409,3 +411,112 @@ def getborrow(request):
         res.delete()
         return HttpResponse("ok")
     return None
+
+
+def noticedetail(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "notice": Notice.objects.get(id=id)
+    }
+    content["notice"].ReadTimes += 1
+    content["notice"].save()
+    return render(request, "both/notice_detail.html", content)
+
+
+def allnotice(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+    }
+    notices = Notice.objects.defer("Content")
+    res = []
+    for year in notices.values('NTime__year').distinct().order_by('-NTime__year'):
+        for month in notices.filter(NTime__year=year["NTime__year"]).values("NTime__month").distinct().order_by(
+                '-NTime__month'):
+            monthNotice = {'YM': '%d-%d' % (year["NTime__year"], month["NTime__month"]),
+                           "notices": notices.filter(
+                               Q(NTime__year=year["NTime__year"]) & Q(NTime__month=month["NTime__month"])).order_by(
+                               '-NTime')}
+            res.append(monthNotice)
+    content["notices"] = res
+    return render(request, "both/all_notice.html", content)
+
+
+def searchbooks(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "SearchState": "active"
+    }
+    if request.method == "POST":
+        search_type = request.POST.get("type")
+        keyword = request.POST.get("keyword")
+        keyword: str
+        content["keyword"] = keyword
+        content["type"] = search_type
+        if search_type == "全部":
+            if keyword.isdigit():
+                content["books"] = Book.objects.filter(Q(BookID=int(keyword)) | Q(BName__icontains=keyword)
+                                                       | Q(Publisher__icontains=keyword)
+                                                       | Q(Author__icontains=keyword) | Q(Category=keyword))
+            else:
+                content["books"] = Book.objects.filter(Q(BName__icontains=keyword)
+                                                       | Q(Publisher__icontains=keyword)
+                                                       | Q(Author__icontains=keyword) | Q(Category__icontains=keyword))
+        elif search_type == "书号":
+            content["books"] = Book.objects.filter(BookID=keyword)
+        elif search_type == "书名":
+            content["books"] = Book.objects.filter(BName__icontains=keyword)
+        elif search_type == "出版社":
+            content["books"] = Book.objects.filter(Publisher__icontains=keyword)
+        elif search_type == "作者":
+            content["books"] = Book.objects.filter(Author__icontains=keyword)
+        elif search_type == "分类":
+            content["books"] = Book.objects.filter(Category__icontains=keyword)
+    else:
+        content["keyword"] = ""
+        content["type"] = "全部"
+        content["books"] = Book.objects.all()
+    return render(request, "both/searchbooks.html", content)
+
+
+def borrow(request):
+    global AccountID, LoginUser, UserAccount
+
+    if request.method == "GET":
+        if len(Borrow.objects.filter((Q(isAllowed__isnull=True) | Q(isAllowed=True)) & (
+                Q(isDelete=False) & Q(ReaderID=LoginUser)))) >= LoginUser.Class.Limited:
+            return HttpResponse("out")
+        id = request.GET.get("id")
+        book = Book.objects.get(BookID=id)
+        newBorrow = Borrow.objects.create(ReaderID=LoginUser, BookID=book)
+        newBorrow.save()
+        newMes = Message.objects.create(Title="借阅申请",
+                                        Content="您申请借阅<<%s>>的请求已发出，管理员会尽快审核" % book.BName, ReaderID=LoginUser)
+        newMes.save()
+        return HttpResponse("yes")
+    return HttpResponse("no")
+
+
+def bookdetail(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    book = Book.objects.get(BookID=id)
+    readers = list(map(lambda item: item["ReaderID"], list(Borrow.objects.filter(BookID=id).values("ReaderID"))))
+    author_books = Book.objects.filter(Q(Author=book.Author) & (~Q(BookID=id)))
+    reader_books = Borrow.objects.filter(Q(ReaderID__in=readers) & (~Q(BookID=id))).annotate(
+        count=Count('BookID')).order_by("-count")[:5]
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "SearchState": "active",
+        "author_books": author_books, "reader_books": reader_books, "book": book
+    }
+    return render(request, "student/bookdetail.html", content)

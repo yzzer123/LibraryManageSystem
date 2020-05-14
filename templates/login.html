@@ -134,7 +134,10 @@
               interval: 5000
             })
             $('.btn').click(function () {
-                flash(this,8,10,100);
+                setTimeout(function () {
+                    flash(this,8,10,100);
+
+                },300)
             })
 
         });

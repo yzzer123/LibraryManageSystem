@@ -13,7 +13,7 @@ $(function () {
   var salesChart  = new Chart($salesChart, {
     type   : 'bar',
     data   : {
-      labels  : ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+      labels  : ['六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
       datasets: [
         {
           backgroundColor: '#007bff',
@@ -52,7 +52,7 @@ $(function () {
           ticks    : $.extend({
             beginAtZero: true,
 
-            // Include a dollar sign in the ticks
+            // 在刻度上加上美元符号
             callback: function (value, index, values) {
               if (value >= 1000) {
                 value /= 1000
@@ -76,7 +76,7 @@ $(function () {
   var $visitorsChart = $('#visitors-chart')
   var visitorsChart  = new Chart($visitorsChart, {
     data   : {
-      labels  : ['18th', '20th', '22nd', '24th', '26th', '28th', '30th'],
+      labels  : ['18 号', '20 号', '22 号', '24 号', '26 号', '28 号', '30 号'],
       datasets: [{
         type                : 'line',
         data                : [100, 120, 170, 167, 180, 177, 160],

@@ -39,29 +39,29 @@ ACCOUNT_TPYE = [
 ]
 
 CATEGORY_CHOICE = [
-        ('1', '思政类'),
-        ('2', '哲学类'),
-        ('3', '社会科学类'),
-        ('4', '军事类'),
-        ('5', '经济类'),
-        ('6', '文化科学类'),
-        ('7', '语言文字类'),
-        ('8', '文学类'),
-        ('9', '艺术类'),
-        ('10', '体育类'),
-        ('11', '历史地理类'),
-        ('12', '自然科学总论类'),
-        ('13', '数理化学类'),
-        ('14', '天文地球科学类'),
-        ('15', '生物科学理类'),
-        ('16', '医药类'),
-        ('17', '农业科学类'),
-        ('18', '工业技术类'),
-        ('19', '交通运输类'),
-        ('20', '航空航天类'),
-        ('21', '环境科学类'),
-        ('22', '计算机类'),
-        ('23', '未分类')
+        ('思政类', '思政类'),
+        ('哲学类', '哲学类'),
+        ('社会科学类', '社会科学类'),
+        ('军事类', '军事类'),
+        ('经济类', '经济类'),
+        ('文化科学类', '文化科学类'),
+        ('语言文字类', '语言文字类'),
+        ('文学类', '文学类'),
+        ('艺术类', '艺术类'),
+        ('体育类', '体育类'),
+        ('历史地理类', '历史地理类'),
+        ('自然科学总论类', '自然科学总论类'),
+        ('数理化学类', '数理化学类'),
+        ('天文地球科学类', '天文地球科学类'),
+        ('生物科学理类', '生物科学理类'),
+        ('医药类', '医药类'),
+        ('农业科学类', '农业科学类'),
+        ('工业技术类', '工业技术类'),
+        ('交通运输类', '交通运输类'),
+        ('航空航天类', '航空航天类'),
+        ('环境科学类', '环境科学类'),
+        ('计算机类', '计算机类'),
+        ('未分类', '未分类')
     ]
 
 
@@ -80,6 +80,7 @@ class Book(models.Model):
     Publisher = models.CharField(max_length=40)
     Author = models.CharField(max_length=30)
     Content = models.TextField(default="无", blank=True, null=True)
+    Price = models.FloatField(default=30.0)
     NumInLib = models.PositiveSmallIntegerField(default=0)
     NumNow = models.PositiveSmallIntegerField(default=0)
     Category = models.CharField(max_length=30, default="未分类", choices=CATEGORY_CHOICE)
@@ -233,7 +234,7 @@ class Notice(models.Model):
     """
     公告类
     """
-    Title = models.CharField(max_length=255)
+    Title = models.CharField(max_length=40)
     NTime = models.DateTimeField(auto_now_add=True)
     Content = models.TextField()
     ReadTimes = models.IntegerField(default=0)

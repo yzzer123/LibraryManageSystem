@@ -20,9 +20,11 @@ from django.contrib import admin
 from django.urls import path
 from BuctLib import views
 from django.views.generic.base import RedirectView
+
 urlpatterns = (
     path('admin/', admin.site.urls),
     path('loginout/', views.loginout),
+    url(r'searchresult/', views.searchbooks, name="searchbooks"),
     path(r'', views.loginpage),
     path(r'debug/', views.hello),
     path(r'pwdmdf/', views.pwdmdf),
@@ -31,12 +33,16 @@ urlpatterns = (
     path(r'readerindex/', views.readerindex),
     path(r'registercheck/', views.registerCheck),
     path(r'404/', views.page404),
+    url(r'brrow/', views.borrow, name='borrow'),
     path(r'jump/', views.jump),
-    path(r'resetApply/',views.resetapply),
+    path(r'resetApply/', views.resetapply),
     path(r'checkpwd/', views.checkpwd),
     path(r'getmessage/', views.getmessage),
     path(r'applyclass/', views.apllyclass),
     path(r'getborrow/', views.getborrow),
+    url(r'allnotice/', views.allnotice, name='allnotice'),
+    url(r'noticedetail/(\d+)/$', views.noticedetail, name='noticepage'),
+    url(r'bookdetail/(\d+)/$', views.bookdetail, name='bookdetail'),
     url(r'infomdf/', views.infmdf, name="modify information"),
     url(r'favicon.ico/', RedirectView.as_view(url=r'/static/img/icons/lib.svg')),
 

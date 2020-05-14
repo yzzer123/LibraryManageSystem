@@ -2,20 +2,26 @@
   <dictionary name="13055">
     <words>
       <w>adminlte</w>
+      <w>allnotice</w>
       <w>allowbooks</w>
+      <w>bookdetail</w>
       <w>buct</w>
       <w>easyicon</w>
+      <w>getborrow</w>
       <w>infmdf</w>
       <w>navbar</w>
       <w>newbook</w>
       <w>newpwd</w>
       <w>newpwderr</w>
+      <w>noticedetail</w>
+      <w>noticepage</w>
       <w>nullallowed</w>
       <w>nullbooks</w>
       <w>oldpwd</w>
       <w>pwderr</w>
       <w>renewpwd</w>
       <w>renewpwderr</w>
+      <w>searchbooks</w>
     </words>
   </dictionary>
 </component>

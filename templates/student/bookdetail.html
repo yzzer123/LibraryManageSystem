@@ -1,0 +1,152 @@
+{% extends 'model/base.html' %}
+{% block title %}
+图书详情-{{ book.BName }}
+{% endblock %}
+{% block StyleSheet %}
+{% endblock %}
+{% block script %}
+    <script>
+     $(function () {
+         var isBorrowed = false;
+         $("#borrow").click(function () {
+             if (isBorrowed !== true)
+             $.ajax({
+            url : "{% url 'borrow' %}",    //提交URL
+            type : "GET",//处理方式
+            data : {id:{{ book.BookID }}},//提交的数据
+            success : function (data) {
+                 if (data === "yes"){
+                    alert("借阅申请已发出");
+                    $("#text").text("已申请借阅");
+                    isBorrowed = true;
+                 }else if (data === "out"){
+                     alert("已超出可借阅上限");
+                 }
+            },//执行成功后的回调函
+            error : function() {
+                alert("借阅失败！")
+            }
+             })
+         })
+
+     })
+    </script>
+{% endblock %}
+{% block content%}
+
+      <div class="card card-solid" style="margin-top: -20px">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-sm-4">
+              <h3 class="d-inline-block d-sm-none">{{ book.BName}}</h3>
+              <div class="col-12" style="margin-top: 20px" >
+                <img src="/static/img/default.jpg" class="product-image elevation-4" alt="产品图片">
+              </div>
+
+            </div>
+            <div class="col-12 col-sm-8">
+              <h3 class="my-3">{{ book.BName}}</h3>
+
+              <hr>
+              <h5 style="display: inline">作者&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+                <h4 style="display: inline">{{ book.Author }}</h4> <br/><br/>
+              <h5 style="display: inline">图书编号&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </h5>
+                <h3 style="display: inline">{{ book.BookID }}</h3><br/><br/>
+              <h5 style="display: inline">出版社&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; </h5>
+                <h4 style="display: inline">{{ book.Publisher }}</h4><br/><br/>
+              <h5 style="display: inline">出版时间&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h5>
+                <h4 style="display: inline">{{ book.PubTime }}</h4><br/><br/>
+              <h5 style="display: inline">图书分类&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </h5>
+                <h4 style="display: inline">{{ book.Category }}</h4><br/><br/>
+                <div class="row">
+                    <div class="col-sm-4">
+                      <h5  style="display: inline">馆藏数量&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+                        <h3 style="display: inline">{{ book.NumInLib }}</h3>
+                    </div>
+                      <div class="col-sm-4">
+              <h5 style="display: inline">在架数量&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+                <h3 style="display: inline">{{ book.NumNow }}</h3>
+                           </div>
+                            <div class="col-sm-4">
+              <h5 style="display: inline">借阅次数&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+                <h3 style="display: inline">{{ book.ReadTimes}}</h3>
+                </div>
+                     </div>
+
+
+              <div class="bg-gray py-2 px-3 mt-4">
+                <h2 class="mb-0">
+                  ￥&nbsp;&nbsp;&nbsp;{{ book.Price }}
+                </h2>
+
+              </div>
+
+              <div class="mt-4" id="borrow" style="cursor: pointer">
+                <div class="btn btn-primary btn-lg btn-flat">
+                  <i class="fas fa-book-open  fa-lg mr-2"></i>
+                  <span id="text">申请借阅</span>
+                </div>
+
+              </div>
+
+
+
+            </div>
+          </div>
+          <div class="row mt-4">
+            <nav class="w-100">
+              <div class="nav nav-tabs" id="product-tab" role="tablist">
+                <a class="nav-item nav-link active" id="product-desc-tab" data-toggle="tab" href="#product-desc" role="tab" aria-controls="product-desc" aria-selected="true">简介</a>
+                <a class="nav-item nav-link" id="product-comments-tab" data-toggle="tab" href="#product-comments" role="tab" aria-controls="product-comments" aria-selected="false">借过本书的人还借过</a>
+                <a class="nav-item nav-link" id="product-rating-tab" data-toggle="tab" href="#product-rating" role="tab" aria-controls="product-rating" aria-selected="false">同名作者的其他著作</a>
+              </div>
+            </nav>
+            <div class="tab-content p-3" id="nav-tabContent">
+              <div class="tab-pane fade show active" id="product-desc" role="tabpanel" aria-labelledby="product-desc-tab">
+              {{ book.Content|linebreaksbr }}
+              </div>
+
+                <div class="tab-pane fade" id="product-comments" role="tabpanel" aria-labelledby="product-comments-tab">
+
+                            {% for reader_book in reader_books %}
+                                <a  style="display: inline-block;width: 350px" href="{% url 'bookdetail'  reader_book.BookID.BookID %}">
+                                    <div class="info-box"  >
+                                      <span class="info-box-icon bg-info"><i class="fa fa-book"></i></span>
+
+                                      <div class="info-box-content">
+                                        <span class="info-box-text">{{ reader_book.BookID.BName }}</span>
+                                        <span class="info-box-number">{{ reader_book.BookID.Author }}</span>
+                                      </div>
+                                      <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </a>
+                            {% endfor %}
+
+                </div>
+              <div class="tab-pane fade" id="product-rating" role="tabpanel" aria-labelledby="product-rating-tab">
+
+                            {% for author_book in author_books %}
+                                <a  style="display: inline-block;width: 350px"  href="{% url 'bookdetail'  author_book.BookID %}">
+                                    <div class="info-box"  >
+                                      <span class="info-box-icon bg-info"><i class="fa fa-book"></i></span>
+
+                                      <div class="info-box-content">
+                                        <span class="info-box-text">{{ author_book.BName }}</span>
+                                        <span class="info-box-number">{{ author_book.Author }}</span>
+                                      </div>
+                                      <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </a>
+                            {% endfor %}
+
+
+                   </div>
+            </div>
+          </div>
+        </div>
+        <!-- /.card-body -->
+      </div>
+
+{% endblock %}

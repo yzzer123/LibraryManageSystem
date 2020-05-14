@@ -10,7 +10,7 @@
     {% block StyleSheet %}
     {% endblock %}
     <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+   <link rel="stylesheet" href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- daterange picker -->
   <link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker.css">
   <!-- iCheck for checkboxes and radio inputs -->
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/static/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="/static/css/main.css">
   <!-- 谷歌字体: Source Sans Pro -->
-  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <link href="/static/dist/css/google.css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <title>{% block title %}My amazing site{% endblock %}</title>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -115,7 +115,7 @@
             </a>
             <ul class="nav nav-treeview ">
               <li class="nav-item">
-                <a href="#" class="nav-link {{ SearchState }}"> <!--active表示被选中的网页-->
+                <a href="{% url 'searchbooks' %}" class="nav-link {{ SearchState }}"> <!--active表示被选中的网页-->
                   <i class="far fa-circle  nav-icon"></i>
                   <p>书籍查询</p>
                 </a>
@@ -207,7 +207,7 @@
   <!-- 内容容器. 包含界面内容 -->
   <div class="content-wrapper backgroundImage">
     <!-- 标题 -->
-    <div class="content-header">
+    <section class="content-header">
       <div class="container-fluid">
 
         <div class="row mb-2">
@@ -220,14 +220,14 @@
 
 
       </div>
-    </div>
+    </section>
 
-       <div class="content">
-      <div class="container-fluid">
-             {% block content %}
-          {% endblock %}
-      </div>
-       </div>
+       <section class="content">
+          <div class="container-fluid">
+                 {% block content %}
+                 {% endblock %}
+          </div>
+       </section>
 
     </div>
     <!-- /.标题-->
@@ -261,7 +261,7 @@
       @buct
     </div>
     <!-- Default to the left -->
-    <strong class="font-weight-light">Copyright &copy; 1999-2020 yzzer工作室</strong>
+    <strong class="font-weight-light">Copyright &copy; 1999-2020 yzzer工作室 powered by <a href="http://adminlte.io">AdminLTE.io</a>.</strong>
   </footer>
 
 <!-- ./wrapper -->
@@ -352,7 +352,7 @@
 
                         for(let i = 0; i < data.allowbooks.length; i++){
                             $("#allowborrow").append(`
-                            <div id="allow${i}" class="row tran" style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
+                            <div id="allow${i}" class="row " style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
                                     <div class="col-sm-12" style="text-align:center; background-color: #33a3dc; padding: 10px; border-radius: 15px;" >
                                             <h6 >书名:${data.allowbooks[i].BName}</h6>
                                             <h6 >作者:${data.allowbooks[i].Author}</h6>
@@ -364,14 +364,14 @@
                         }
                             for(let i = 0; i < data.nullbooks.length; i++){
                             $("#nullborrow").append(`
-                            <div id="null${i}" class="row tran" style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
+                            <div id="null${i}" class="row " style="margin-top: 10px;margin-bottom: 10px;border-radius: 15px">
                                     <div class="col-sm-9" style="background-color: #50b8c1; padding: 10px; border-bottom-left-radius: 15px;border-top-left-radius: 15px" >
                                             <h6 >书名:${data.nullbooks[i].BName}</h6>
                                             <h6 >作者:${data.nullbooks[i].Author}</h6>
                                             <h6 >出版社:${data.nullbooks[i].Publisher}</h6>
                                     </div>
-                                    <div class="col-sm-3" style="border-bottom-right-radius: 15px;border-top-right-radius: 15px;background-color:#f391a9;cursor: pointer;">
-                                            <h5 class="font-weight-bold" style="margin-top: 70%" id="nullbook${data.nullbooks[i].id}">撤销</h5>
+                                    <div class="col-sm-3" id="nullbook${data.nullbooks[i].id}" style="border-bottom-right-radius: 15px;border-top-right-radius: 15px;background-color:#f391a9;cursor: pointer;">
+                                            <h5 class="font-weight-bold" style="margin-top: 70%" >撤销</h5>
                                     </div>
                             </div>
                             `);
@@ -383,8 +383,9 @@
                                         type: "GET",
                                         data:{way:"reset",id:id},
                                         success:function () {
-                                            $(`#null${i}`).hide();
-
+                                            $(`#null${i}`).hide({
+                                                duration:400
+                                            });
                                         },
                                         error:function () {
                                             alert("撤销失败");

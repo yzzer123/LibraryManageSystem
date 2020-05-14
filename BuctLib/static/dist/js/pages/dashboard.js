@@ -2,14 +2,14 @@
  * Author: Abdullah A Almsaeed
  * Date: 4 Jan 2014
  * Description:
- *      This is a demo file used only for the main dashboard (studentindex.html)
+ *      该文件仅用于主仪表盘的演示 （index.html）
  **/
 
 $(function () {
 
   'use strict'
 
-  // Make the dashboard widgets sortable Using jquery UI
+  // 使用 jQuery UI 使仪表盘小部件可排序
   $('.connectedSortable').sortable({
     placeholder         : 'sort-highlight',
     connectWith         : '.connectedSortable',
@@ -19,7 +19,7 @@ $(function () {
   })
   $('.connectedSortable .card-header, .connectedSortable .nav-tabs-custom').css('cursor', 'move')
 
-  // jQuery UI sortable for the todo list
+  // jQuery UI 可排序待办事项列表
   $('.todo-list').sortable({
     placeholder         : 'sort-highlight',
     handle              : '.handle',
@@ -27,17 +27,17 @@ $(function () {
     zIndex              : 999999
   })
 
-  // bootstrap WYSIHTML5 - text editor
+  // bootstrap WYSIHTML5 - 文本编辑器
   $('.textarea').summernote()
 
-  $('.daterange').daterangepicker({
+  $('.daterange').daterangepicker({locale:{applyLabel: '确定',cancelLabel: '取消',customRangeLabel: '自定义范围',},locale:{applyLabel: '确定',cancelLabel: '取消',customRangeLabel: '自定义范围',},
     ranges   : {
-      'Today'       : [moment(), moment()],
-      'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-      'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
-      'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-      'This Month'  : [moment().startOf('month'), moment().endOf('month')],
-      'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+      '今天'       : [moment(), moment()],
+      '昨天'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+      '最近7天' : [moment().subtract(6, 'days'), moment()],
+      '最近30天': [moment().subtract(29, 'days'), moment()],
+      '本月'  : [moment().startOf('month'), moment().endOf('month')],
+      '上月'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
     },
     startDate: moment().subtract(29, 'days'),
     endDate  : moment()
@@ -97,7 +97,7 @@ $(function () {
   sparkline2.draw([515, 519, 520, 522, 652, 810, 370, 627, 319, 630, 921]);
   sparkline3.draw([15, 19, 20, 22, 33, 27, 31, 27, 19, 30, 21]);
 
-  // The Calender
+  // 日历
   $('#calendar').datetimepicker({
     format: 'L',
     inline: true
@@ -109,15 +109,15 @@ $(function () {
   })
 
   /* Chart.js Charts */
-  // Sales chart
+  // 销售图表
   var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d');
   //$('#revenue-chart').get(0).getContext('2d');
 
   var salesChartData = {
-    labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels  : ['一月', '二月', '三月', '四月', '五月', '六月', '七月'],
     datasets: [
       {
-        label               : 'Digital Goods',
+        label               : '数字商品',
         backgroundColor     : 'rgba(60,141,188,0.9)',
         borderColor         : 'rgba(60,141,188,0.8)',
         pointRadius          : false,
@@ -128,7 +128,7 @@ $(function () {
         data                : [28, 48, 40, 19, 86, 27, 90]
       },
       {
-        label               : 'Electronics',
+        label               : '电子产品',
         backgroundColor     : 'rgba(210, 214, 222, 1)',
         borderColor         : 'rgba(210, 214, 222, 1)',
         pointRadius         : false,
@@ -161,7 +161,7 @@ $(function () {
     }
   }
 
-  // This will get the first returned node in the jQuery collection.
+  // 这将获取 jQuery 中的第一个返回的节点。
   var salesChart = new Chart(salesChartCanvas, {
       type: 'line',
       data: salesChartData,
@@ -173,9 +173,9 @@ $(function () {
   var pieChartCanvas = $('#sales-chart-canvas').get(0).getContext('2d')
   var pieData        = {
     labels: [
-        'Instore Sales',
-        'Download Sales',
-        'Mail-Order Sales',
+        '店内销售',
+        '下载销售',
+        '邮购销售',
     ],
     datasets: [
       {
@@ -191,23 +191,23 @@ $(function () {
     maintainAspectRatio : false,
     responsive : true,
   }
-  //Create pie or douhnut chart
-  // You can switch between pie and douhnut using the method below.
+  // 创建饼形图或圆环图
+  // 你可以使用以下方法在此之间进行切换。
   var pieChart = new Chart(pieChartCanvas, {
     type: 'doughnut',
     data: pieData,
     options: pieOptions
   });
 
-  // Sales graph chart
+  // 销售图表
   var salesGraphChartCanvas = $('#line-chart').get(0).getContext('2d');
   //$('#revenue-chart').get(0).getContext('2d');
 
   var salesGraphChartData = {
-    labels  : ['2011 Q1', '2011 Q2', '2011 Q3', '2011 Q4', '2012 Q1', '2012 Q2', '2012 Q3', '2012 Q4', '2013 Q1', '2013 Q2'],
+    labels  : ['2011 一季度', '2011 二季度', '2011 三季度', '2011 四季度', '2012 一季度', '2012 二季度', '2012 三季度', '2012 四季度', '2013 一季度', '2013 二季度'],
     datasets: [
       {
-        label               : 'Digital Goods',
+        label               : '数字商品',
         fill                : false,
         borderWidth         : 2,
         lineTension         : 0,
@@ -253,7 +253,7 @@ $(function () {
     }
   }
 
-  // This will get the first returned node in the jQuery collection.
+  // 这将获取 jQuery 中的第一个返回的节点。
   var salesGraphChart = new Chart(salesGraphChartCanvas, {
       type: 'line',
       data: salesGraphChartData,

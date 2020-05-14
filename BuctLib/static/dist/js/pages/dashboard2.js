@@ -4,21 +4,21 @@ $(function () {
 
   /* ChartJS
    * -------
-   * Here we will create a few charts using ChartJS
+   * 在这里，我们将使用 ChartJS 创建一些图表
    */
 
   //-----------------------
-  //- MONTHLY SALES CHART -
+  //- 月销售额图表 -
   //-----------------------
 
-  // Get context with jQuery - using jQuery's .get() method.
+  // 使用 jQuery .get() 方法获取内容。
   var salesChartCanvas = $('#salesChart').get(0).getContext('2d')
 
   var salesChartData = {
-    labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels  : ['一月', '二月', '三月', '四月', '五月', '六月', '七月'],
     datasets: [
       {
-        label               : 'Digital Goods',
+        label               : '数字商品',
         backgroundColor     : 'rgba(60,141,188,0.9)',
         borderColor         : 'rgba(60,141,188,0.8)',
         pointRadius          : false,
@@ -29,7 +29,7 @@ $(function () {
         data                : [28, 48, 40, 19, 86, 27, 90]
       },
       {
-        label               : 'Electronics',
+        label               : '电子产品',
         backgroundColor     : 'rgba(210, 214, 222, 1)',
         borderColor         : 'rgba(210, 214, 222, 1)',
         pointRadius         : false,
@@ -62,31 +62,31 @@ $(function () {
     }
   }
 
-  // This will get the first returned node in the jQuery collection.
-  var salesChart = new Chart(salesChartCanvas, { 
-      type: 'line', 
-      data: salesChartData, 
+  // 这将获取 jQuery 中的第一个返回的节点。
+  var salesChart = new Chart(salesChartCanvas, {
+      type: 'line',
+      data: salesChartData,
       options: salesChartOptions
     }
   )
 
   //---------------------------
-  //- END MONTHLY SALES CHART -
+  //- 月销售额图表结束 -
   //---------------------------
 
   //-------------
-  //- PIE CHART -
+  //- 饼形图 -
   //-------------
-  // Get context with jQuery - using jQuery's .get() method.
+  // 使用 jQuery .get() 方法获取内容。
     var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
     var pieData        = {
       labels: [
-          'Chrome', 
+          'Chrome',
           'IE',
-          'FireFox', 
-          'Safari', 
-          'Opera', 
-          'Navigator', 
+          'FireFox',
+          'Safari',
+          'Opera',
+          'Navigator',
       ],
       datasets: [
         {
@@ -100,21 +100,21 @@ $(function () {
         display: false
       }
     }
-    //Create pie or douhnut chart
-    // You can switch between pie and douhnut using the method below.
+    // 创建饼形图或圆环图
+    // 你可以使用以下方法在此之间进行切换。
     var pieChart = new Chart(pieChartCanvas, {
       type: 'doughnut',
       data: pieData,
-      options: pieOptions      
+      options: pieOptions
     })
 
   //-----------------
-  //- END PIE CHART -
+  //- 结束饼形图 -
   //-----------------
 
-  /* jVector Maps
+  /* jVector 地图
    * ------------
-   * Create a world map with markers
+   * 使用用标记创建世界地图
    */
   $('#world-map-markers').mapael({
       map: {
@@ -159,107 +159,107 @@ $(function () {
   //   markers          : [
   //     {
   //       latLng: [41.90, 12.45],
-  //       name  : 'Vatican City'
+  //       name  : '梵蒂冈'
   //     },
   //     {
   //       latLng: [43.73, 7.41],
-  //       name  : 'Monaco'
+  //       name  : '摩纳哥'
   //     },
   //     {
   //       latLng: [-0.52, 166.93],
-  //       name  : 'Nauru'
+  //       name  : '瑙鲁'
   //     },
   //     {
   //       latLng: [-8.51, 179.21],
-  //       name  : 'Tuvalu'
+  //       name  : '图瓦卢'
   //     },
   //     {
   //       latLng: [43.93, 12.46],
-  //       name  : 'San Marino'
+  //       name  : '圣马力诺'
   //     },
   //     {
   //       latLng: [47.14, 9.52],
-  //       name  : 'Liechtenstein'
+  //       name  : '列支敦士登'
   //     },
   //     {
   //       latLng: [7.11, 171.06],
-  //       name  : 'Marshall Islands'
+  //       name  : '马绍尔群岛'
   //     },
   //     {
   //       latLng: [17.3, -62.73],
-  //       name  : 'Saint Kitts and Nevis'
+  //       name  : '圣基茨和尼维斯'
   //     },
   //     {
   //       latLng: [3.2, 73.22],
-  //       name  : 'Maldives'
+  //       name  : '马尔代夫'
   //     },
   //     {
   //       latLng: [35.88, 14.5],
-  //       name  : 'Malta'
+  //       name  : '马耳他'
   //     },
   //     {
   //       latLng: [12.05, -61.75],
-  //       name  : 'Grenada'
+  //       name  : '格林纳达'
   //     },
   //     {
   //       latLng: [13.16, -61.23],
-  //       name  : 'Saint Vincent and the Grenadines'
+  //       name  : '圣文森特和格林纳丁斯'
   //     },
   //     {
   //       latLng: [13.16, -59.55],
-  //       name  : 'Barbados'
+  //       name  : '巴巴多斯'
   //     },
   //     {
   //       latLng: [17.11, -61.85],
-  //       name  : 'Antigua and Barbuda'
+  //       name  : '安提瓜和巴布达'
   //     },
   //     {
   //       latLng: [-4.61, 55.45],
-  //       name  : 'Seychelles'
+  //       name  : '塞舌尔'
   //     },
   //     {
   //       latLng: [7.35, 134.46],
-  //       name  : 'Palau'
+  //       name  : '帕劳'
   //     },
   //     {
   //       latLng: [42.5, 1.51],
-  //       name  : 'Andorra'
+  //       name  : '安道尔'
   //     },
   //     {
   //       latLng: [14.01, -60.98],
-  //       name  : 'Saint Lucia'
+  //       name  : '圣卢西亚'
   //     },
   //     {
   //       latLng: [6.91, 158.18],
-  //       name  : 'Federated States of Micronesia'
+  //       name  : '密克罗尼西亚联邦'
   //     },
   //     {
   //       latLng: [1.3, 103.8],
-  //       name  : 'Singapore'
+  //       name  : '新加坡'
   //     },
   //     {
   //       latLng: [1.46, 173.03],
-  //       name  : 'Kiribati'
+  //       name  : '基里巴斯'
   //     },
   //     {
   //       latLng: [-21.13, -175.2],
-  //       name  : 'Tonga'
+  //       name  : '汤加'
   //     },
   //     {
   //       latLng: [15.3, -61.38],
-  //       name  : 'Dominica'
+  //       name  : '多米尼克'
   //     },
   //     {
   //       latLng: [-20.2, 57.5],
-  //       name  : 'Mauritius'
+  //       name  : '毛里求斯'
   //     },
   //     {
   //       latLng: [26.02, 50.55],
-  //       name  : 'Bahrain'
+  //       name  : '巴林'
   //     },
   //     {
   //       latLng: [0.33, 6.73],
-  //       name  : 'São Tomé and Príncipe'
+  //       name  : '圣多美和普林西比'
   //     }
   //   ]
   // })

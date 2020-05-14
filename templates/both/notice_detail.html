@@ -1,0 +1,65 @@
+{% extends 'model/base.html' %}
+
+{%  block title %}
+    公告详情
+{% endblock %}
+
+{% block StyleSheet %}
+    <style>
+
+    </style>
+{%  endblock %}
+{% block script %}
+    <script>
+    $(function () {
+        $("#fontMin").click(function () {
+            $("#notice-container").css("font-size", "15px");
+        })
+        $("#fontMid").click(function () {
+            $("#notice-container").css("font-size", "20px");
+        })
+        $("#fontMax").click(function () {
+            $("#notice-container").css("font-size", "25px");
+        })
+    })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-lg-12 " >
+            <div class="card font" >
+              <div class="card-header gradient-color-her">
+                <h3 class="card-title">公告详情</h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand" style="color: white"></i>
+                  </button>
+                </div>
+                <!-- /.card-tools -->
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body" style="overflow-y: scroll;max-height: 100%;" >
+                  <div class="row">
+                    <h2 class="title m-auto font-weight-bold font-gradient" >{{ notice.Title }}</h2>
+                  </div>
+                  <div class="row"  style="margin-top: 10px">
+                        <p class="m-auto"><a id="fontMin" href="#">[小]</a>&nbsp;&nbsp;&nbsp;<a id="fontMid" href="#">[中]</a>&nbsp;&nbsp;&nbsp;<a id="fontMax" href="#">[大]</a></p>
+                  </div>
+                  <div class="row" style="margin-top: 10px ; padding-bottom: 10px;border-bottom: 1px solid #d3d7d4 ;">
+                      <h6 class="m-auto"><strong>发布日期：&nbsp;&nbsp;</strong>{{ notice.NTime }}
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <strong>阅读次数：&nbsp;&nbsp;&nbsp;&nbsp;</strong>{{ notice.ReadTimes }} </h6>
+                  </div>
+                  <div class="noticebody row" id="notice-container" style="font-size: 20px;margin-top: 20px; min-height: 340px">
+
+
+                      <p class="col-lg-8 offset-lg-2" >{{ notice.Content|linebreaksbr }}</p>
+
+                  </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+
+{% endblock %}
