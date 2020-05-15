@@ -47,7 +47,9 @@
                                             isBorrow[{{ forloop.counter }}] = true;
                                          }else if (data === "out"){
                                              alert("已超出可借阅上限");
-                                         }
+                                         }else if (data === "nobook"){
+                     alert("图书在架数量为0，借阅失败");
+                 }
                                     },//执行成功后的回调函
                                     error : function() {
                                         alert("借阅失败！")

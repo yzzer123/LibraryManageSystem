@@ -1,7 +1,9 @@
 # from datetime import datetime
-
+from datetime import datetime, timedelta
+from random import seed, random
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, JsonResponse
+from dateutil.relativedelta import relativedelta
 from BuctLib.models import *
 from BuctLib.src.formCheck import *
 from django.db.models import Q, Count
@@ -496,6 +498,8 @@ def borrow(request):
             return HttpResponse("out")
         id = request.GET.get("id")
         book = Book.objects.get(BookID=id)
+        if book.NumNow == 0:
+            return HttpResponse("nobook")
         newBorrow = Borrow.objects.create(ReaderID=LoginUser, BookID=book)
         newBorrow.save()
         newMes = Message.objects.create(Title="借阅申请",
@@ -520,3 +524,75 @@ def bookdetail(request, id):
         "author_books": author_books, "reader_books": reader_books, "book": book
     }
     return render(request, "student/bookdetail.html", content)
+
+
+def commend(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    seed(str(datetime.now().date()))
+    commend_rd = int(random() * 1000)
+    # LoginUser: Reader
+    # 选出读者最喜欢的书类别
+    readed_books = Borrow.objects.filter(ReaderID=LoginUser.ReaderID)
+    books_list = list(map(lambda item: item["BookID"], readed_books.values("BookID")))
+    try:
+        reader_like_cat = \
+        readed_books.values('BookID__Category').annotate(count=Count("BookID__Category")).order_by("-count")[0]
+        books = Book.objects.filter(
+            (~Q(BookID__in=books_list)) & Q(Category=reader_like_cat["BookID__Category"])).order_by('-ReadTimes')[:10]
+        book = books[commend_rd % 10]
+    except:
+        books = Book.objects.filter(
+            (~Q(BookID__in=books_list))).order_by('-ReadTimes')[:10]
+        book = books[commend_rd % 10]
+    readers = list(map(lambda item: item["ReaderID"], list(Borrow.objects.filter(id=book.BookID).values("ReaderID"))))
+    author_books = Book.objects.filter(Q(Author=book.Author) & (~Q(BookID=book.BookID)))
+    reader_books = Borrow.objects.filter(Q(ReaderID__in=readers) & (~Q(BookID=book.BookID))).annotate(
+        count=Count('BookID')).order_by("-count")[:5]
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "RecState": "active",
+        "author_books": author_books, "reader_books": reader_books, "book": book
+    }
+    return render(request, "student/bookdetail.html", content)
+
+
+def datavisual(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    borrows = Borrow.objects.all()
+    now = datetime.now()
+    week_data = []
+    month_data = []
+    cate_data = []
+    school_data = []
+    for i in range(7):
+        day = now - timedelta(days=i)
+        week_data.append({"data": borrows.filter(BorrowTime=day).count(),
+                          "day": day.strftime("%m-%d")})
+        if i < 6:
+            month = now - relativedelta(months=i)
+            month_data.append({"data": borrows.filter(Q(BorrowTime__month=month.month) & Q(BorrowTime__year=month.year)).count(),
+                               "month": str(month.strftime("%Y-%m"))})
+    for cate in CATEGORY_CHOICE:
+        cate_data.append({
+            "cate": cate[1],
+            "data": borrows.filter(BookID__Category=cate[0]).count()
+        })
+    for school in SCHOOLS:
+        school_data.append({
+            "school": school[1],
+            "data": borrows.filter(ReaderID__School=school[0]).count()
+        })
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "dataState": "active",
+        "week_data": week_data, "month_data": month_data, "cate_data": cate_data, "school_data": school_data
+    }
+    print(week_data)
+    print(month_data)
+    print(cate_data)
+    print(school_data)
+    return render(request, "both/datavisual.html", content)

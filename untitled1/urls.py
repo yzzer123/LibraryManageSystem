@@ -37,6 +37,8 @@ urlpatterns = (
     path(r'jump/', views.jump),
     path(r'resetApply/', views.resetapply),
     path(r'checkpwd/', views.checkpwd),
+    path(r'todaycommend/', views.commend),
+    path(r'todaylib/',views.datavisual),
     path(r'getmessage/', views.getmessage),
     path(r'applyclass/', views.apllyclass),
     path(r'getborrow/', views.getborrow),

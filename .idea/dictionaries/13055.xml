@@ -6,6 +6,7 @@
       <w>allowbooks</w>
       <w>bookdetail</w>
       <w>buct</w>
+      <w>datavisual</w>
       <w>easyicon</w>
       <w>getborrow</w>
       <w>infmdf</w>
@@ -13,6 +14,7 @@
       <w>newbook</w>
       <w>newpwd</w>
       <w>newpwderr</w>
+      <w>nobook</w>
       <w>noticedetail</w>
       <w>noticepage</w>
       <w>nullallowed</w>
