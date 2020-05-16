@@ -6,9 +6,11 @@
       <w>allowbooks</w>
       <w>bookdetail</w>
       <w>buct</w>
+      <w>checkingbooks</w>
       <w>datavisual</w>
       <w>easyicon</w>
       <w>getborrow</w>
+      <w>getmesnum</w>
       <w>infmdf</w>
       <w>navbar</w>
       <w>newbook</w>
@@ -23,7 +25,9 @@
       <w>pwderr</w>
       <w>renewpwd</w>
       <w>renewpwderr</w>
+      <w>returnbook</w>
       <w>searchbooks</w>
+      <w>showbred</w>
     </words>
   </dictionary>
 </component>

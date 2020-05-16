@@ -57,6 +57,7 @@
           {% block mes %}
         <a class="nav-link" data-toggle="dropdown" href="#" id="MesBtn">
           <i class="far fa-comments" style="color: #007d65"></i>
+            <span class="badge badge-danger navbar-badge" id="mesnum"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="MesBox">
             <div id="Mes">
@@ -145,13 +146,13 @@
             </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
-                        <a class="nav-link {{ CheckState }}" href="#">
+                        <a class="nav-link {{ CheckState }}" href="{% url 'checking' %}">
                             <i class="far fa-circle nav-icon"></i>
-                            <p>审核中</p>
+                            <p>借阅审核</p>
                         </a>
                   </li>
                    <li class="nav-item">
-                        <a class="nav-link {{ NotRState }}" href="#">
+                        <a class="nav-link {{ NotRState }}" href="/notreturn/">
                             <i class="far fa-circle nav-icon"></i>
                             <p>未归还</p>
                         </a>
@@ -295,6 +296,7 @@
                                 $("#Mes").append(`
                                     <a href="#" class="dropdown-item">
                                     <div class="media">
+                                    <img src="/static/img/icons/avatar_user.jpg" alt="用户头像" class="img-size-50 img-circle mr-3">
                                      <div class="media-body">
                                         <h3 class="dropdown-item-title">
                                           ${i.Title}
@@ -330,7 +332,7 @@
                                     success : function (data) {
                                          if (data === "ok"){
                                             $("#Mes").html(bottom_message)
-
+                                              $("#mesnum").hide()
                                          }
                                     },//执行成功后的回调函
                                     error : function() {
@@ -408,6 +410,19 @@
             }
         })
 
+        $.ajax({
+            url: "/getmesnum/",
+            type: "GET",
+            data:{way:"get"},
+            success:function (num) {
+
+                if (num === "0" || num === 'no'){
+                    $("#mesnum").hide()
+                }else{
+                    $("#mesnum").text(num)
+                }
+            }
+        })
 
     }
 </script>

@@ -1,0 +1,146 @@
+{%  extends "model/base.html" %}
+{% block title %} 借阅审核 {% endblock %}
+<!--JS代码-->
+{% block script %}
+<script>
+ $(function () {
+     {% for item in checkings %}
+    $(`#cancel{{ item.id }}`).click(function () {
+        let id = {{ item.id }};
+                $.ajax ({
+                    url: "/getborrow/",
+                    type: "GET",
+                    data:{way:"reset",id:id},
+                    success:function () {
+                        $(`#${id}`).hide({
+                            duration:400
+                        });
+                    },
+                    error:function () {
+                        alert("撤销失败");
+                    }
+                })
+        })
+     {% endfor %}
+  {% for item in rejects %}
+    $(`#delete{{ item.id }}`).click(function () {
+        let id = {{ item.id }};
+                $.ajax ({
+                    url: "/getborrow/",
+                    type: "GET",
+                    data:{way:"reset",id:id},
+                    success:function () {
+                        $(`#${id}`).hide({
+                            duration:400
+                        });
+                    },
+                    error:function () {
+                        alert("撤销失败");
+                    }
+                })
+        })
+     {% endfor %}
+ })
+</script>
+{% endblock %}
+<!--css代码-->
+{% block StyleSheet %}
+{%  endblock %}
+
+{% block content %}
+    <div class="row">
+          <div class="col-md-12">
+            <!-- The time line -->
+            <div class="timeline">
+             <div class="time-label">
+                <span class="bg-gradient-blue">未审核</span>
+              </div>
+
+              {% for item in checkings %}
+              <div id="{{ item.id }}">
+                <i class="fas fa-book bg-gradient-blue"></i>
+                <div class="timeline-item">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon bg-primary">
+                                未审核
+                        </div>
+                      </div>
+                  <span class="time float-left"><i class="fas fa-clock"></i> {{ item.BorrowTime }}</span>
+                  <h2 class="timeline-header font-weight-light"><span class="btn-sm btn-primary" style="background-color: #66afe9"> 借阅申请</span></h2>
+
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">《{{ item.BookID.BName }}》</h3>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;作者:&nbsp;{{ item.BookID.Author }}</h5>
+                      <h5 class="font-weight-lighter col-sm-3" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;出版社:&nbsp;{{ item.BookID.Publisher }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;分类:&nbsp;{{ item.BookID.Category }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;借阅申请编号:&nbsp;{{ item.id }}</h5>
+
+                  </div>
+                  <div class="timeline-footer">
+                    <div class="btn btn-danger btn-sm" style="background-color: #f15b6c;cursor: pointer" id="cancel{{ item.id }}">撤销申请</div>
+                  </div>
+                </div>
+              </div>
+                  {% empty %}
+                    <div >
+                <i class="fas fa-book bg-gradient-blue"></i>
+                <div class="timeline-item">
+                  <h2 class="timeline-header font-weight-light"></h2>
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">没有正在申请的借阅记录(((;꒪ꈊ꒪;)))</h3>
+                  </div>
+
+                </div>
+              </div>
+
+             {% endfor %}
+             <div class="time-label">
+                <span class="bg-gradient-red">已拒绝</span>
+              </div>
+              {% for item in rejects %}
+              <div id="{{ item.id }}">
+                <i class="fas fa-ban bg-gradient-red"></i>
+                <div class="timeline-item">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon bg-gradient-danger">
+                                被拒绝
+                        </div>
+                      </div>
+                  <span class="time float-left"><i class="fas fa-clock"></i> {{ item.BorrowTime }}</span>
+                  <h2 class="timeline-header font-weight-light"><span class="btn-sm btn-primary" style="background-color: #f58f98"> 被驳回申请</span></h2>
+
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">《{{ item.BookID.BName }}》</h3>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;作者:&nbsp;{{ item.BookID.Author }}</h5>
+                      <h5 class="font-weight-lighter col-sm-3" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;出版社:&nbsp;{{ item.BookID.Publisher }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;分类:&nbsp;{{ item.BookID.Category }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;借阅申请编号:&nbsp;{{ item.id }}</h5>
+
+                  </div>
+                    <h6 class="font-weight-lighter col-sm-2" style="display: inline">详细的拒绝原因，请查看消息通知</h6>
+
+                  <div class="timeline-footer">
+                    <div class="btn btn-danger btn-sm" style="background-color: #f15b6c;cursor: pointer" id="delete{{ item.id }}">删除记录</div>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+                     <div >
+                <i class="fas fa-book bg-gradient-red"></i>
+                <div class="timeline-item">
+                  <h2 class="timeline-header font-weight-light"></h2>
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">没有被拒绝的借阅记录(((;꒪ꈊ꒪;)))</h3>
+                  </div>
+
+                </div>
+              </div>
+             {% endfor %}
+              <div>
+                <i class="fas fa-clock bg-gradient-lightblue"></i>
+              </div>
+            </div>
+          </div>
+          <!-- /.col -->
+        </div>
+{% endblock %}

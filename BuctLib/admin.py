@@ -66,7 +66,8 @@ class BorrowAdmin(admin.ModelAdmin):
     """
     list_display = [
         "ReaderID", "BookID", "BorrowTime",
-        "ReturnDay", "isReBorrowed", "isDelete"
+        "ReturnDay", "isReBorrowed", "isDelete", 'isLegal', 'isAllowed'
+
     ]
 
 

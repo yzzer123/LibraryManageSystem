@@ -197,6 +197,7 @@ class Borrow(models.Model):
     BorrowTime = models.DateField(auto_now_add=True)
     ReturnDay = models.DateField(auto_now_add=True)
     isReBorrowed = models.BooleanField(default=False)
+    isLegal = models.BooleanField(default=True)
     isDelete = models.BooleanField(default=False)
     isAllowed = models.NullBooleanField(null=True)
 

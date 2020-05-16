@@ -379,8 +379,7 @@ def getmessage(request):
     elif request.method == "GET" and request.GET.get("way") == "reset":
         res = Message.objects.filter(ReaderID=LoginUser.ReaderID, Status="未读")
         for item in res:
-            item.Status = "已读"
-            item.save()
+            item.delete()
         return HttpResponse("ok")
     else:
         return None
@@ -410,7 +409,11 @@ def getborrow(request):
     # 删除未审核的借书记录
     elif request.method == "GET" and request.GET.get("way") == "reset":
         res = Borrow.objects.get(id=request.GET.get("id"))
-        res.delete()
+        res.isDelete = True
+        res.save()
+        newMes = Message.objects.create(Title="删除撤销借阅",
+                                        Content="您借阅《%s》的记录已经被撤销删除" % res.BookID.BName, ReaderID=LoginUser)
+        newMes.save()
         return HttpResponse("ok")
     return None
 
@@ -493,7 +496,7 @@ def borrow(request):
     global AccountID, LoginUser, UserAccount
 
     if request.method == "GET":
-        if len(Borrow.objects.filter((Q(isAllowed__isnull=True) | Q(isAllowed=True)) & (
+        if len(Borrow.objects.filter(((Q(isAllowed__isnull=True) | Q(isAllowed=True)) & Q(isDelete=False)) & (
                 Q(isDelete=False) & Q(ReaderID=LoginUser)))) >= LoginUser.Class.Limited:
             return HttpResponse("out")
         id = request.GET.get("id")
@@ -503,7 +506,7 @@ def borrow(request):
         newBorrow = Borrow.objects.create(ReaderID=LoginUser, BookID=book)
         newBorrow.save()
         newMes = Message.objects.create(Title="借阅申请",
-                                        Content="您申请借阅<<%s>>的请求已发出，管理员会尽快审核" % book.BName, ReaderID=LoginUser)
+                                        Content="您申请借阅《%s》的请求已发出，管理员会尽快审核" % book.BName, ReaderID=LoginUser)
         newMes.save()
         return HttpResponse("yes")
     return HttpResponse("no")
@@ -538,7 +541,7 @@ def commend(request):
     books_list = list(map(lambda item: item["BookID"], readed_books.values("BookID")))
     try:
         reader_like_cat = \
-        readed_books.values('BookID__Category').annotate(count=Count("BookID__Category")).order_by("-count")[0]
+            readed_books.values('BookID__Category').annotate(count=Count("BookID__Category")).order_by("-count")[0]
         books = Book.objects.filter(
             (~Q(BookID__in=books_list)) & Q(Category=reader_like_cat["BookID__Category"])).order_by('-ReadTimes')[:10]
         book = books[commend_rd % 10]
@@ -562,7 +565,7 @@ def datavisual(request):
     global AccountID, LoginUser, UserAccount
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
-    borrows = Borrow.objects.all()
+    borrows = Borrow.objects.filter(isAllowed=True)
     now = datetime.now()
     week_data = []
     month_data = []
@@ -574,8 +577,9 @@ def datavisual(request):
                           "day": day.strftime("%m-%d")})
         if i < 6:
             month = now - relativedelta(months=i)
-            month_data.append({"data": borrows.filter(Q(BorrowTime__month=month.month) & Q(BorrowTime__year=month.year)).count(),
-                               "month": str(month.strftime("%Y-%m"))})
+            month_data.append(
+                {"data": borrows.filter(Q(BorrowTime__month=month.month) & Q(BorrowTime__year=month.year)).count(),
+                 "month": str(month.strftime("%Y-%m"))})
     for cate in CATEGORY_CHOICE:
         cate_data.append({
             "cate": cate[1],
@@ -596,3 +600,93 @@ def datavisual(request):
     print(cate_data)
     print(school_data)
     return render(request, "both/datavisual.html", content)
+
+
+def checkingbooks(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    checkings = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed__isnull=True) & Q(isDelete=False)).order_by(
+        '-BorrowTime')
+    rejects = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed=False) & Q(isDelete=False)).order_by(
+        '-BorrowTime')
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "CheckState": "active",
+        'checkings': checkings, "rejects": rejects
+    }
+    return render(request, 'student/borrow/checking.html', content)
+
+
+def getmesnum(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return HttpResponse("no")
+    if request.method == 'GET':
+        num = Message.objects.filter(ReaderID=LoginUser).count()
+        return HttpResponse(num)
+    return HttpResponse("no")
+
+
+def showbred(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    bred_books = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed=True) & Q(isDelete=False)).order_by(
+        '-BorrowTime')
+    outdate = bred_books.filter(ReturnDay__lt=datetime.now().date())
+    print(bred_books)
+    print(outdate)
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "NotRState": "active",
+        "bred_books": bred_books.filter(ReturnDay__gte=datetime.now().date()), "nowdate": datetime.now(),
+        "outdate_books": outdate, "outdate_num": outdate.count()
+    }
+
+    return render(request, "student/borrow/notreturn.html", content)
+
+
+def returnbook(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        raise Http404
+    if request.method == "GET":
+        ID = request.GET.get('id')
+        br = Borrow.objects.get(id=ID)
+        if br.ReturnDay < datetime.now().date():
+            br.isLegal = False
+            br.isDelete = True
+            br.BookID.NumNow += 1
+            br.BookID.save()
+            br.save()
+            m = Message.objects.create(Title="逾期归还图书",
+                                       Content="您借阅的《%s》已经归还，鉴于您已逾期，违规记录已生成，请在违规记录栏下查看违规报告" % br.BookID.BName,
+                                       ReaderID=LoginUser)
+            m.save()
+            return HttpResponse("ok")
+        else:
+            br.isDelete = True
+            br.BookID.NumNow += 1
+            br.BookID.save()
+            br.save()
+            m = Message.objects.create(Title="成功归还图书",
+                                       Content="您借阅的《%s》已经归还，欢迎下次借阅" % br.BookID.BName,
+                                       ReaderID=LoginUser)
+            m.save()
+            return HttpResponse("ok")
+    return Http404
+
+
+def delayreturn(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        raise Http404
+    br = Borrow.objects.get(id=id)
+    br.ReturnDay += timedelta(days=LoginUser.Class.Days)
+    br.isReBorrowed = True
+    br.save()
+    m = Message.objects.create(Title="续借通知", ReaderID=LoginUser,
+                               Content="您借阅《%s》的归还日期已被延长%d天, 请按期归还" % (br.BookID.BName, LoginUser.Class.Days))
+    m.save()
+    return HttpResponse("ok")

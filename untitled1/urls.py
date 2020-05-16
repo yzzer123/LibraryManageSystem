@@ -35,6 +35,7 @@ urlpatterns = (
     path(r'404/', views.page404),
     url(r'brrow/', views.borrow, name='borrow'),
     path(r'jump/', views.jump),
+    url(r'checking/', views.checkingbooks, name='checking'),
     path(r'resetApply/', views.resetapply),
     path(r'checkpwd/', views.checkpwd),
     path(r'todaycommend/', views.commend),
@@ -47,5 +48,8 @@ urlpatterns = (
     url(r'bookdetail/(\d+)/$', views.bookdetail, name='bookdetail'),
     url(r'infomdf/', views.infmdf, name="modify information"),
     url(r'favicon.ico/', RedirectView.as_view(url=r'/static/img/icons/lib.svg')),
-
+    path(r'getmesnum/', views.getmesnum),
+    path(r'notreturn/', views.showbred),
+    path(r'return/', views.returnbook),
+    url(r'delayreturn/(\d+)/$', views.delayreturn, name='delay'),
 )

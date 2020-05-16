@@ -1,0 +1,175 @@
+{%  extends "model/base.html" %}
+{% block title %} 已借阅 {% endblock %}
+<!--JS代码-->
+{% block script %}
+<script>
+ $(function () {
+     {% for item in bred_books %}
+    $(`#return{{ item.id }}`).click(function () {
+        let id = {{ item.id }};
+                $.ajax ({
+                    url: "/return/",
+                    type: "GET",
+                    data:{way:"reset",id:id},
+                    success:function () {
+                        $(`#${id}`).hide({
+                            duration:400
+                        });
+                    },
+                    error:function () {
+                        alert("归还失败");
+                    }
+                })
+        })
+         {% if not item.isReBorrowed %}
+         $(`#delay{{ item.id }}`).click(function () {
+          $.ajax({
+              url:"{% url 'delay' item.id %}",
+              type: 'GET',
+              data:{way:"reset"},
+              success:function () {
+                    document.location.href = "/notreturn/"
+              },
+              error:function () {
+                    alert("续借失败")
+              }
+          })
+         })
+         {% endif %}
+     {% endfor %}
+  {% for item in outdate_books %}
+    $(`#return{{ item.id }}`).click(function () {
+        let id = {{ item.id }};
+                $.ajax ({
+                    url: "/return/",
+                    type: "GET",
+                    data:{way:"reset",id:id},
+                    success:function () {
+
+                        alert("逾期还书，违规行为已被记录")
+                        $(`#${id}`).hide({
+                            duration:400
+                        });
+
+                    },
+                    error:function () {
+                        alert("归还失败");
+                    }
+                })
+        })
+
+     {% endfor %}
+
+ })
+</script>
+{% endblock %}
+<!--css代码-->
+{% block StyleSheet %}
+{%  endblock %}
+
+{% block content %}
+    <div class="row">
+          <div class="col-md-12">
+            <!-- The time line -->
+            <div class="timeline">
+             <div class="time-label">
+                <span class="bg-gradient-blue">未逾期</span>
+              </div>
+
+              {% for item in bred_books %}
+              <div id="{{ item.id }}">
+                <i class="fas fa-book bg-gradient-blue"></i>
+                <div class="timeline-item">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon bg-primary">
+                                状态正常
+                        </div>
+                      </div>
+                    <span class="time  btn-warning btn-lg" style="margin-top: 5px;margin-right: 80px;color: white;background-color: rgba(250,169,24,0.93)"><i class="fas fa-clock"></i> 还书日期： {{ item.ReturnDay }}</span>
+                  <span class="time  btn-success btn-lg" style="margin-top: 5px;margin-right: 40px; color: white;background-color: rgba(77,215,77,0.88)"><i class="fas fa-clock"></i> 借书日期： {{ item.BorrowTime }}</span>
+                  <h2 class="timeline-header font-weight-light"><span class="btn-lg btn-primary" style="background-color: #66afe9"> 正在借阅中</span></h2>
+
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">《{{ item.BookID.BName }}》</h3>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;作者:&nbsp;{{ item.BookID.Author }}</h5>
+                      <h5 class="font-weight-lighter col-sm-3" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;出版社:&nbsp;{{ item.BookID.Publisher }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;分类:&nbsp;{{ item.BookID.Category }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;借阅申请编号:&nbsp;{{ item.id }}</h5>
+
+                  </div>
+                  <div class="timeline-footer">
+                  <hr>
+                    <div class="btn btn-primary btn-sm" style="cursor: pointer" id="return{{ item.id }}">归还图书</div>
+                      {% if not item.isReBorrowed %}
+                      <div id="delay{{ item.id }}" class="btn btn-success btn-sm" style="cursor: pointer;background-color: rgba(77,215,77,0.88);margin-left: 50px" >可续借</div>
+                      {% else %}
+                      <div class="btn btn-dark btn-sm" style="background-color: grey;margin-left: 50px" >已续借</div>
+                      {% endif %}
+                  </div>
+                </div>
+              </div>
+                  {% empty %}
+                    <div >
+                <i class="fas fa-book bg-gradient-blue"></i>
+                <div class="timeline-item">
+                  <h2 class="timeline-header font-weight-light"></h2>
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">没有借阅期内的已借阅图书(((;꒪ꈊ꒪;)))</h3>
+                  </div>
+
+                </div>
+              </div>
+
+             {% endfor %}
+             <div class="time-label">
+                <span class="bg-gradient-warning">逾期借阅</span>
+              </div>
+               {% for item in outdate_books %}
+              <div id="{{ item.id }}">
+                <i class="fas fa-warning bg-gradient-warning" ></i>
+                <div class="timeline-item">
+                    <div class="ribbon-wrapper" >
+                        <div class="ribbon bg-gradient-danger" >
+                                违规超期
+                        </div>
+                      </div>
+                    <span class="time  btn-warning btn-lg" style="margin-top: 5px;margin-right: 80px;color: white;background-color: rgba(231,53,37,0.93)"><i class="fas fa-clock"></i> 还书日期： {{ item.ReturnDay }}</span>
+                  <span class="time  btn-success btn-lg" style="margin-top: 5px;margin-right: 40px; color: white;background-color: rgba(77,215,77,0.88)"><i class="fas fa-clock"></i> 借书日期： {{ item.BorrowTime }}</span>
+                  <h2 class="timeline-header font-weight-light"><span class="btn-lg btn-warning" style="color: white"> 已超期</span></h2>
+
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">《{{ item.BookID.BName }}》</h3>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;作者:&nbsp;{{ item.BookID.Author }}</h5>
+                      <h5 class="font-weight-lighter col-sm-3" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;出版社:&nbsp;{{ item.BookID.Publisher }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;分类:&nbsp;{{ item.BookID.Category }}</h5>
+                      <h5 class="font-weight-lighter col-sm-2" style="display: inline">&nbsp;&nbsp;&nbsp;&nbsp;借阅申请编号:&nbsp;{{ item.id }}</h5>
+
+                  </div>
+                  <div class="timeline-footer">
+                  <hr>
+                    <div class="btn btn-primary btn-sm" style="cursor: pointer" id="return{{ item.id }}">归还图书</div>
+
+                  </div>
+                </div>
+              </div>
+                  {% empty %}
+                    <div >
+                <i class="fas fa-book bg-gradient-blue"></i>
+                <div class="timeline-item">
+                  <h2 class="timeline-header font-weight-light"></h2>
+                  <div class="timeline-body row">
+                        <h3 class="font-weight-lighter inline col-sm-12" style="display: inline">没有超出借阅期限的图书(((;꒪ꈊ꒪;)))</h3>
+                  </div>
+
+                </div>
+              </div>
+
+             {% endfor %}
+              <div>
+                <i class="fas fa-clock bg-gradient-lightblue"></i>
+              </div>
+            </div>
+          </div>
+          <!-- /.col -->
+        </div>
+{% endblock %}
