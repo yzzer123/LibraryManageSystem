@@ -169,7 +169,7 @@ class Fine(models.Model):
     LimitDay是小于该期限的处罚金额
     FineMoney是处罚金额
     """
-    LimitDay = models.PositiveSmallIntegerField(unique=True)
+    LimitDay = models.PositiveSmallIntegerField(unique=True, db_index=True)
     FineMoney = models.PositiveSmallIntegerField(default=10)
 
 
@@ -196,9 +196,11 @@ class Borrow(models.Model):
     BookID = models.ForeignKey(to="Book", on_delete=models.CASCADE)
     BorrowTime = models.DateField(auto_now_add=True)
     ReturnDay = models.DateField(auto_now_add=True)
+    RealreturnDay = models.DateField(default='2020-01-01')
     isReBorrowed = models.BooleanField(default=False)
-    isLegal = models.BooleanField(default=True)
+    isLegal = models.NullBooleanField(default=True)
     isDelete = models.BooleanField(default=False)
+    isReturned = models.BooleanField(default=False)
     isAllowed = models.NullBooleanField(null=True)
 
     def __str__(self):

@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="/static/fontawesome-free/css/all.min.css">
     {% block StyleSheet %}
     {% endblock %}
-    <!-- Ionicons -->
-   <link rel="stylesheet" href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- daterange picker -->
+{#    <!-- Ionicons -->#}
+{#   <link rel="stylesheet" href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css">#}
+{#  <!-- daterange picker -->#}
   <link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker.css">
   <!-- iCheck for checkboxes and radio inputs -->
   <link rel="stylesheet" href="/static/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
@@ -158,13 +158,13 @@
                         </a>
                   </li>
                    <li class="nav-item">
-                        <a class="nav-link {{ RState }}" href="#">
+                        <a class="nav-link {{ RState }}" href="/returned/">
                             <i class="far fa-circle nav-icon"></i>
                             <p>已归还</p>
                         </a>
                   </li>
                    <li class="nav-item">
-                        <a class="nav-link {{ IllegalState }}" href="#">
+                        <a class="nav-link {{ IllegalState }}" href="/illegal/">
                             <i class="far fa-circle nav-icon"></i>
                             <p>违规记录</p>
                         </a>

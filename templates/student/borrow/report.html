@@ -1,0 +1,140 @@
+{% extends 'model/base.html' %}
+
+{%  block title %}
+    违规报告
+{% endblock %}
+
+{% block StyleSheet %}
+    <style>
+
+    </style>
+{%  endblock %}
+{% block script %}
+    <script>
+    $(function () {
+        $("#fontMin").click(function () {
+            $("#notice-container").css("font-size", "15px");
+        })
+        $("#fontMid").click(function () {
+            $("#notice-container").css("font-size", "20px");
+        })
+        $("#fontMax").click(function () {
+            $("#notice-container").css("font-size", "25px");
+        })
+    })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-lg-12 " >
+            <div class="card font" >
+              <div class="card-header gradient-color-her">
+                <h3 class="card-title">违规报告</h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="maximize"><i class="fas fa-expand" style="color: white"></i>
+                  </button>
+                </div>
+                <!-- /.card-tools -->
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body" style="overflow-y: scroll;max-height: 100%;" >
+                  <div class="row">
+                    <h2 class="title m-auto font-weight-bold font-gradient" >逾期借阅处罚报告</h2>
+                  </div>
+                  <div class="row"  style="margin-top: 10px">
+                        <p class="m-auto"><a id="fontMin" href="#">[小]</a>&nbsp;&nbsp;&nbsp;<a id="fontMid" href="#">[中]</a>&nbsp;&nbsp;&nbsp;<a id="fontMax" href="#">[大]</a></p>
+                  </div>
+                  <hr/>
+                  <div class="noticebody row" id="notice-container" style="font-size: 20px;margin-top: 20px; min-height: 340px">
+
+
+                      <div class="m-auto" >
+                        <h2 style="text-align: center">读者逾期处罚单</h2>
+                            <table border="1px" cellpadding="15px">
+                                <tr>
+                                    <th>姓名</th>
+                                    <td>{{ report_br.ReaderID.Name }}</td>
+                                    {% if report_br.ReaderID.Type == '1' %}
+                                    <th>学号</th>
+                                    {%  else %}
+                                    <th>工号</th>
+                                    {% endif %}
+                                    <td>{{ report_br.ReaderID.ReaderID }}</td>
+                                    <th>性别</th>
+                                    <td>{{ report_br.ReaderID.get_Gender_display }}</td>
+
+                                </tr>
+                             <tr>
+                                    <th>读者类型</th>
+                                    <td>{{ report_br.ReaderID.get_Type_display }}</td>
+                                    <th>学院</th>
+                                    <td>{{ report_br.ReaderID.get_School_display }}</td>
+                                    <th>读者等级</th>
+                                    <td>{{ report_br.ReaderID.Class }}</td>
+
+                                </tr>
+                             <tr>
+                                    <th>电子邮箱</th>
+                                    <td colspan="2">{{ report_br.ReaderID.AccountID.Email }}</td>
+                                    <th>手机号</th>
+                                    <td colspan="2">{{ report_br.ReaderID.AccountID.Tel }}</td>
+                                </tr>
+                            <tr>
+                                <th>图书编号</th>
+                                <td>{{ report_br.BookID.BookID }}</td>
+                                <th>借阅书名</th>
+                                <td colspan="3">{{ report_br.BookID }}</td>
+                            </tr>
+                            <tr>
+                                <th>借阅记录编号</th>
+                                <td>{{ report_br.id }}</td>
+                                <th>逾期时间</th>
+                                <td>{{ fine.days }}天</td>
+                                <th>罚金</th>
+                                <td>{{ fine.fine_money }}元</td>
+                            </tr>
+                            <tr>
+                                <th rowspan="4">处罚通知</th>
+                                <td rowspan="4" colspan="5">
+                                <p>
+                                    亲爱的读者：<br/><br/>
+                                    {% if not report_br.isLegal %}
+                                    &nbsp;&nbsp;&nbsp;
+                                        您在我馆借阅的图书已经逾期，根据图书馆的相关规定，我馆<br/>
+                                        将会根据相应的逾期时间做出处罚。同时,系统会记录您的违规记<br/>
+                                        录.鉴于您当前还没有归还图书，处罚金额会根据逾期时间有所提<br/>
+                                        升，请您及时归还图书，并持此单到图书馆一楼办事处缴纳费用。<br/>
+                                        如有异议和特殊情况，也可持本单到办事处咨询或申诉。<br/>
+
+                                        <br/>
+                                    {% else %}
+                                        &nbsp;&nbsp;&nbsp;
+                                        您借阅的图书已归还，但已经逾期，根据图书馆的相关规定，我<br/>
+                                        馆将会根据响应的逾期时间做出处罚。同时,系统会记录您的违规<br/>
+                                        记录.请持此单到图书馆一楼办事处缴纳费用。如有异议和特殊情<br/>
+                                        况，也可持本单到办事处咨询或申诉。<br/>
+
+                                        <br/>
+                                    {% endif %}
+                                        <span class="float-right">北京化工大学图书馆</span>
+
+                                </p>
+                                </td>
+
+
+                            </tr>
+                            </table>
+                            <p class="float-right">时间:&nbsp;&nbsp;{{ nowDate }}</p>
+                      <br/><br/><br/>
+                      <p style="font-size: 13px" >注： 请持本单到图书馆一层缴纳处罚金，对不及时缴纳处罚金的账户，管理员将会进行注销</p>
+                          </div>
+
+                  </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+
+{% endblock %}

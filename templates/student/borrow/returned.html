@@ -1,0 +1,81 @@
+{% extends 'model/base.html' %}
+{% block title %}已归还图书{% endblock %}
+{% block script %}
+<script>
+     $(function () {
+        {% for br in borrow_record %}
+            $("#delete{{ br.id }}").click(function () {
+                $.ajax({
+                    url: '/deletebr/',
+                    way: 'GET',
+                    data:{id: {{ br.id }}},
+                    success:function () {
+                        $("#tr{{ br.id }}").hide({duration:300})
+                    },
+                    error:function () {
+                        alert("删除失败")
+                    }
+
+                })
+            })
+         {% endfor %}
+     })
+</script>
+{% endblock %}
+{% block StyleSheet %}
+<style>
+
+</style>
+{% endblock %}
+{% block content %}
+  <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">已归还书籍记录</h3>
+
+                <div class="card-tools">
+
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 540px;margin-top: 20px">
+                <table class="table table-hover table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>借书编号</th>
+                      <th>书名</th>
+                      <th>作者</th>
+                      <th>出版社</th>
+                      <th>归还日期</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for br in borrow_record %}
+                        <tr id="tr{{ br.id }}">
+                          <td>{{ br.id }}</td>
+                          <td>{{ br.BookID.BName }}</td>
+                          <td>{{ br.BookID.Author }}</td>
+                          <td>{{ br.BookID.Publisher }}</td>
+                          <td>{{ br.RealreturnDay }}</td>
+                            {% if br.isLegal %}
+                                <td ><button class="btn btn-success btn-sm" style="background-color: rgba(77,215,77,0.88);cursor: text">正常归还</button></td>
+                            {% else %}
+                            <td ><button class="btn btn-danger btn-sm" style="background-color: #f15b6c;cursor: text">逾期归还</button></td>
+                            {% endif %}
+                            <td><button id="delete{{ br.id }}" class="btn btn-danger btn-sm" style="background-color: #f15b6c">删除</button></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+{% endblock %}
+
+

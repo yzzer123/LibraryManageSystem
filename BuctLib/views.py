@@ -400,7 +400,7 @@ def getborrow(request):
             nullallowed_books.append(newbook)
         # 查阅已借记录
         allowed_borrow = Borrow.objects.filter(
-            Q(ReaderID=LoginUser.ReaderID) & Q(isDelete=False) & Q(isAllowed=True))
+            Q(ReaderID=LoginUser.ReaderID) & Q(isReturned=False) & Q(isDelete=False) & Q(isAllowed=True))
         for item in allowed_borrow:
             newbook = {"id": item.id, "BookID": item.BookID.BookID, "BName": item.BookID.BName,
                        "Author": item.BookID.Author, "Publisher": item.BookID.Publisher}
@@ -496,8 +496,9 @@ def borrow(request):
     global AccountID, LoginUser, UserAccount
 
     if request.method == "GET":
-        if len(Borrow.objects.filter(((Q(isAllowed__isnull=True) | Q(isAllowed=True)) & Q(isDelete=False)) & (
-                Q(isDelete=False) & Q(ReaderID=LoginUser)))) >= LoginUser.Class.Limited:
+        if len(Borrow.objects.filter(
+                ((Q(isAllowed__isnull=True) | Q(isAllowed=True)) & Q(isReturned=False) & Q(isDelete=False)) & (
+                        Q(isDelete=False) & Q(ReaderID=LoginUser)))) >= LoginUser.Class.Limited:
             return HttpResponse("out")
         id = request.GET.get("id")
         book = Book.objects.get(BookID=id)
@@ -565,7 +566,7 @@ def datavisual(request):
     global AccountID, LoginUser, UserAccount
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
-    borrows = Borrow.objects.filter(isAllowed=True)
+    borrows = Borrow.objects.filter(Q(isAllowed=True) | Q(isAllowed__isnull=True))
     now = datetime.now()
     week_data = []
     month_data = []
@@ -595,10 +596,7 @@ def datavisual(request):
         "OpenLib": "menu-open", "LibState": "active", "dataState": "active",
         "week_data": week_data, "month_data": month_data, "cate_data": cate_data, "school_data": school_data
     }
-    print(week_data)
-    print(month_data)
-    print(cate_data)
-    print(school_data)
+
     return render(request, "both/datavisual.html", content)
 
 
@@ -632,11 +630,11 @@ def showbred(request):
     global AccountID, LoginUser, UserAccount
     if AccountID is None or LoginUser is None or UserAccount is None:
         return render(request, "page404.html")
-    bred_books = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed=True) & Q(isDelete=False)).order_by(
+    bred_books = Borrow.objects.filter(
+        Q(ReaderID=LoginUser) & Q(isAllowed=True) & Q(isReturned=False) & Q(isDelete=False)).order_by(
         '-BorrowTime')
     outdate = bred_books.filter(ReturnDay__lt=datetime.now().date())
-    print(bred_books)
-    print(outdate)
+
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
         "OpenBr": "menu-open", "BrState": "active", "NotRState": "active",
@@ -656,8 +654,9 @@ def returnbook(request):
         br = Borrow.objects.get(id=ID)
         if br.ReturnDay < datetime.now().date():
             br.isLegal = False
-            br.isDelete = True
+            br.isReturned = True
             br.BookID.NumNow += 1
+            br.RealreturnDay = datetime.now().date()
             br.BookID.save()
             br.save()
             m = Message.objects.create(Title="逾期归还图书",
@@ -666,8 +665,9 @@ def returnbook(request):
             m.save()
             return HttpResponse("ok")
         else:
-            br.isDelete = True
+            br.isReturned = True
             br.BookID.NumNow += 1
+            br.RealreturnDay = datetime.now().date()
             br.BookID.save()
             br.save()
             m = Message.objects.create(Title="成功归还图书",
@@ -690,3 +690,107 @@ def delayreturn(request, id):
                                Content="您借阅《%s》的归还日期已被延长%d天, 请按期归还" % (br.BookID.BName, LoginUser.Class.Days))
     m.save()
     return HttpResponse("ok")
+
+
+def showreturned(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    br = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isDelete=False) & Q(isReturned=True))
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "RState": "active",
+        'borrow_record': br,
+    }
+    return render(request, "student/borrow/returned.html", content)
+
+
+def showillegal(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        return render(request, "page404.html")
+    now = datetime.now().date()
+    br = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed=True) & (
+            (Q(isDelete=False) & Q(ReturnDay__lt=now) & Q(isReturned=False)) | (Q(isLegal=False) & Q(isReturned=True))))
+    fines = []
+    for item in br:
+        if not item.isReturned:
+            days = (now - item.ReturnDay).days
+        else:
+            days = (item.RealreturnDay - item.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+        fines.append(fine)
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+        'illegal_record': zip(br, fines),
+    }
+    return render(request, "student/borrow/illegal.html", content)
+
+
+def deletebr(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None:
+        raise Http404
+    if request.method == "GET":
+        br_id = request.GET.get('id')
+        br = Borrow.objects.get(id=br_id)
+        br.isDelete = True
+        br.save()
+        return HttpResponse("ok")
+    return Http404
+
+
+def illegal_report(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None:
+        return render(request, "page404.html")
+
+    report_br = Borrow.objects.get(id=id)
+    now = datetime.now()
+    if report_br.ReaderID != LoginUser:
+        # 非当前读者的违规报告
+
+        render(request, "page404.html")
+    elif (not report_br.isLegal) and report_br.isAllowed == True\
+            and report_br.isReturned == True:
+
+        # 已归还， 但已经超期
+        days = (report_br.RealreturnDay - report_br.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+
+        content = {
+            "LoginUser": LoginUser, "UserAccount": UserAccount,
+            "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+            'report_br': report_br, "fine": fine, "nowDate": now.date()
+        }
+
+        return render(request, "student/borrow/report.html", content)
+    elif report_br.isAllowed == True and report_br.ReturnDay < now.date() and report_br.isReturned == False:
+        # 正在借阅 已经超期
+        days = (now.date() - report_br.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+
+        content = {
+            "LoginUser": LoginUser, "UserAccount": UserAccount,
+            "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+            'report_br': report_br, "fine": fine, "nowDate": now.date()
+        }
+
+        return render(request, "student/borrow/report.html", content)
+    else:
+
+        return render(request, "page404.html")
+    # except:
+    #     print('errr')
+    #     return render(request, "page404.html")
+    return render(request, "page404.html")

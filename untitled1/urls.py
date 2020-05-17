@@ -51,5 +51,9 @@ urlpatterns = (
     path(r'getmesnum/', views.getmesnum),
     path(r'notreturn/', views.showbred),
     path(r'return/', views.returnbook),
+    path(r'returned/', views.showreturned),
+    path(r'illegal/', views.showillegal),
     url(r'delayreturn/(\d+)/$', views.delayreturn, name='delay'),
+    path(r'deletebr/', views.deletebr),
+    url(r'illegalreport/(\d+)/$', views.illegal_report, name="illegal")
 )
