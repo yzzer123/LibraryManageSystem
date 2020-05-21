@@ -90,6 +90,12 @@ class Book(models.Model):
     def __str__(self):
         return self.BName
 
+    def save(self, *args, **kwargs):
+        if self.NumInLib < self.NumNow:
+            raise Exception("在架数量不能超过馆藏数量")
+        else:
+            super(self.__class__, self).save(*args, **kwargs)
+
 
 class User(models.Model):
     """
@@ -133,7 +139,7 @@ class ReaderClass(models.Model):
     Limited为可借阅数量
     Day为借阅天数
     """
-    Class = models.CharField(max_length=4, primary_key=True, db_index=True)
+    Class = models.CharField(max_length=10, primary_key=True, db_index=True)
     Limited = models.PositiveSmallIntegerField(default=3)
     Days = models.PositiveSmallIntegerField(default=30, null=True)
 
@@ -170,7 +176,7 @@ class Fine(models.Model):
     FineMoney是处罚金额
     """
     LimitDay = models.PositiveSmallIntegerField(unique=True, db_index=True)
-    FineMoney = models.PositiveSmallIntegerField(default=10)
+    FineMoney = models.PositiveSmallIntegerField(default=0)
 
 
 class ApplyClass(models.Model):

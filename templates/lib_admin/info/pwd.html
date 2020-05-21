@@ -1,4 +1,4 @@
-{% extends "model/base.html" %}
+{% extends "model/adminbase.html" %}
 {% block title %}
 修改密码
 {% endblock %}
@@ -26,7 +26,7 @@
               </div>
 
               <!-- 表单开始-->
-              <form role="form" method="post" action="/checkpwd/" class="pwd-form">
+              <form role="form" method="post" action="/admin_checkpwd/" class="pwd-form">
                   {% csrf_token %}
 
                 <div class="card-body">

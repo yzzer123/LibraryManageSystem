@@ -21,7 +21,13 @@ def hello(request):
         LoginUser: LoginUser,
         UserAccount: UserAccount,
     }
-    return render(request, "model/base.html", content)
+    if LoginUser:
+        if not AccountType:
+            return render(request, "model/base.html", content)
+        else:
+            return render(request, 'model/adminbase.html', content)
+
+    return render(request, 'page404.html')
 
 
 def loginpage(request):
@@ -34,8 +40,7 @@ def loginpage(request):
         if not AccountType:
             return readerindex(request)
         else:
-            return render(request, "testmodel/manager.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
-
+            return adminindex(request)
     content = {
         "isPwdW": False,
         "isNoAct": False,
@@ -87,7 +92,7 @@ def logincheck(request):
                 except:
                     return page404(request)
 
-                return render(request, "testmodel/manager.html", {"LoginUser": LoginUser, "UserAccount": UserAccount})
+                return adminindex(request)
         else:
             # 密码错误
             content = {
@@ -134,7 +139,7 @@ def registerCheck(request):
     phone = request.POST.get("Phone")
     email = request.POST.get("email")
     Type = request.POST.get("type")
-
+    Key = request.POST.get("Key")
     # 记录返回值
     content = {
         'Account': account,
@@ -151,6 +156,7 @@ def registerCheck(request):
         "checkedR": False,
         'PwdERR': check_pwd(pwd),
         'ActERR': check_user_name(account),
+        "KeyERR": "",
         'IdERR': check_id(ID),
         'EmailERR': check_email(email),  # Django会自动检查邮箱
         'PhoneERR': check_phone(phone),
@@ -195,6 +201,9 @@ def registerCheck(request):
             content["isIdERR"] = True
             content["IdERR"] = "学号已被注册"
             return render(request, "register.html", content)
+        if Key != "reader_user":
+            content["KeyERR"] = "注册码不正确"
+            return render(request, "register.html", content)
         user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
         reader = Reader.objects.create(ReaderID=ID, AccountID=user)
         reader.save()
@@ -205,6 +214,9 @@ def registerCheck(request):
             content["isIdERR"] = True
             content["IdERR"] = "工号已被注册"
             return render(request, "register.html", content)
+        if Key != "admin_manager":
+            content["KeyERR"] = "注册码不正确"
+            return render(request, "register.html", content)
         user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
         manager = Manager.objects.create(ManagerID=ID, AccountID=user)
         manager.save()
@@ -212,10 +224,20 @@ def registerCheck(request):
     return render(request, "pagejump.html")
 
 
+def adminindex(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    books = Book.objects.all().order_by('-ReadTimes')[:5]
+    notices = Notice.objects.all().order_by('-NTime')[:5]
+    return render(request, "lib_admin/adminindex.html",
+                  {"LoginUser": LoginUser, "UserAccount": UserAccount, "books": books, "notices": notices})
+
+
 def readerindex(request):
     global AccountID, LoginUser, UserAccount
 
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     books = Book.objects.all().order_by('-ReadTimes')[:5]
     notices = Notice.objects.all().order_by('-NTime')[:5]
@@ -232,15 +254,23 @@ def jump(request):
 
 
 def pwdmdf(request):
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     return render(request, "student/information/pwd-mdf.html",
                   {"mdfpwdState": "active", "InfState": "active", "OpenInf": "menu-open", "LoginUser": LoginUser,
                    "UserAccount": UserAccount})
 
 
+def admin_pwdmdf(request):
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    return render(request, "lib_admin/info/pwd.html",
+                  {"mdfpwdState": "active", "InfState": "active", "OpenInf": "menu-open", "LoginUser": LoginUser,
+                   "UserAccount": UserAccount})
+
+
 def checkpwd(request):
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         LoginUser: LoginUser, UserAccount: UserAccount,
@@ -273,11 +303,48 @@ def checkpwd(request):
     return render(request, "student/information/pwd-mdf.html", content)
 
 
+def admin_checkpwd(request):
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        LoginUser: LoginUser, UserAccount: UserAccount,
+        "mdfpwdState": "active", "InfState": "active", "OpenInf": "menu-open",
+    }
+    oldpwd = request.POST.get("old_pwd")
+    newpwd = request.POST.get("new_pwd")
+    renewpwd = request.POST.get("renew_pwd")
+    if oldpwd != UserAccount.Password:
+        content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
+        content["pwderr"] = "原密码错误"
+        return render(request, "lib_admin/info/pwd.html", content)
+    else:
+        err = check_pwd(newpwd)
+        if err != "":
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
+            content["newpwderr"] = err
+            return render(request, "lib_admin/info/pwd.html", content)
+
+        elif newpwd == oldpwd:
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
+            content["newpwderr"] = "与原密码相同"
+            return render(request, "lib_admin/info/pwd.html", content)
+
+        elif renewpwd != newpwd:
+            content["oldpwd"], content["newpwd"], content["renewpwd"] = oldpwd, newpwd, renewpwd
+            content["renewpwderr"] = "密码不一致"
+            return render(request, "lib_admin/info/pwd.html", content)
+
+    UserAccount.Password = newpwd
+    UserAccount.save()
+    content["work"] = "work"
+    return render(request, "lib_admin/info/pwd.html", content)
+
+
 def infmdf(request):
     global AccountID, LoginUser, UserAccount
     # LoginUser: Reader
     # UserAccount: User
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
@@ -319,9 +386,48 @@ def infmdf(request):
     return render(request, "student/information/information-mdf.html", content)
 
 
+def admin_infmdf(request):
+    global AccountID, LoginUser, UserAccount
+    # LoginUser: Reader
+    # UserAccount: User
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "mdfInfState": "active", "InfState": "active"
+    }
+    initial_form = {"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
+                    "AdminID": LoginUser.ManagerID,
+                    "Gender": LoginUser.Gender,
+                    "Name": LoginUser.Name,
+                    }
+    if request.method == "POST":
+        form = AdminInfForm(request.POST, initial=initial_form)
+        if form.is_valid():
+            content["work"] = "work"  # 数据合法
+            UserAccount.Email = form.cleaned_data["Email"]
+            UserAccount.Tel = form.cleaned_data["Tel"]
+            LoginUser.Gender = form.cleaned_data["Gender"]
+            LoginUser.Name = form.cleaned_data["Name"]
+            LoginUser.save()
+            UserAccount.save()
+            content["form"] = AdminInfForm(
+                initial={"AccountID": AccountID, "Email": UserAccount.Email, "Tel": UserAccount.Tel,
+                         "AdminID": LoginUser.ManagerID,
+                         "Gender": LoginUser.Gender,
+                         "Name": LoginUser.Name,
+                         })
+        else:
+            content["form"] = form
+    else:
+        form = AdminInfForm(initial=initial_form)
+        content["form"] = form
+    return render(request, "lib_admin/info/information-mdf.html", content)
+
+
 def apllyclass(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
@@ -420,7 +526,7 @@ def getborrow(request):
 
 def noticedetail(request, id):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
@@ -428,12 +534,25 @@ def noticedetail(request, id):
     }
     content["notice"].ReadTimes += 1
     content["notice"].save()
-    return render(request, "both/notice_detail.html", content)
+    return render(request, "student/library/notice_detail.html", content)
+
+
+def admin_noticedetail(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "notice": Notice.objects.get(id=id)
+    }
+    content["notice"].ReadTimes += 1
+    content["notice"].save()
+    return render(request, "lib_admin/library/notice_detail.html", content)
 
 
 def allnotice(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
@@ -449,12 +568,33 @@ def allnotice(request):
                                '-NTime')}
             res.append(monthNotice)
     content["notices"] = res
-    return render(request, "both/all_notice.html", content)
+    return render(request, "student/library/all_notice.html", content)
+
+
+def admin_allnotice(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+    }
+    notices = Notice.objects.defer("Content")
+    res = []
+    for year in notices.values('NTime__year').distinct().order_by('-NTime__year'):
+        for month in notices.filter(NTime__year=year["NTime__year"]).values("NTime__month").distinct().order_by(
+                '-NTime__month'):
+            monthNotice = {'YM': '%d-%d' % (year["NTime__year"], month["NTime__month"]),
+                           "notices": notices.filter(
+                               Q(NTime__year=year["NTime__year"]) & Q(NTime__month=month["NTime__month"])).order_by(
+                               '-NTime')}
+            res.append(monthNotice)
+    content["notices"] = res
+    return render(request, "lib_admin/library/all_notice.html", content)
 
 
 def searchbooks(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     content = {
         "LoginUser": LoginUser, "UserAccount": UserAccount,
@@ -489,7 +629,47 @@ def searchbooks(request):
         content["keyword"] = ""
         content["type"] = "全部"
         content["books"] = Book.objects.all()
-    return render(request, "both/searchbooks.html", content)
+    return render(request, "student/library/searchbooks.html", content)
+
+
+def admin_searchbooks(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "SearchState": "active"
+    }
+    if request.method == "POST":
+        search_type = request.POST.get("type")
+        keyword = request.POST.get("keyword")
+        keyword: str
+        content["keyword"] = keyword
+        content["type"] = search_type
+        if search_type == "全部":
+            if keyword.isdigit():
+                content["books"] = Book.objects.filter(Q(BookID=int(keyword)) | Q(BName__icontains=keyword)
+                                                       | Q(Publisher__icontains=keyword)
+                                                       | Q(Author__icontains=keyword) | Q(Category=keyword))
+            else:
+                content["books"] = Book.objects.filter(Q(BName__icontains=keyword)
+                                                       | Q(Publisher__icontains=keyword)
+                                                       | Q(Author__icontains=keyword) | Q(Category__icontains=keyword))
+        elif search_type == "书号":
+            content["books"] = Book.objects.filter(BookID=keyword)
+        elif search_type == "书名":
+            content["books"] = Book.objects.filter(BName__icontains=keyword)
+        elif search_type == "出版社":
+            content["books"] = Book.objects.filter(Publisher__icontains=keyword)
+        elif search_type == "作者":
+            content["books"] = Book.objects.filter(Author__icontains=keyword)
+        elif search_type == "分类":
+            content["books"] = Book.objects.filter(Category__icontains=keyword)
+    else:
+        content["keyword"] = ""
+        content["type"] = "全部"
+        content["books"] = Book.objects.all()
+    return render(request, "lib_admin/library/searchbooks.html", content)
 
 
 def borrow(request):
@@ -515,7 +695,7 @@ def borrow(request):
 
 def bookdetail(request, id):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     book = Book.objects.get(BookID=id)
     readers = list(map(lambda item: item["ReaderID"], list(Borrow.objects.filter(BookID=id).values("ReaderID"))))
@@ -530,9 +710,26 @@ def bookdetail(request, id):
     return render(request, "student/bookdetail.html", content)
 
 
+def admin_bookdetail(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    book = Book.objects.get(BookID=id)
+    readers = list(map(lambda item: item["ReaderID"], list(Borrow.objects.filter(BookID=id).values("ReaderID"))))
+    author_books = Book.objects.filter(Q(Author=book.Author) & (~Q(BookID=id)))
+    reader_books = Borrow.objects.filter(Q(ReaderID__in=readers) & (~Q(BookID=id))).annotate(
+        count=Count('BookID')).order_by("-count")[:5]
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "SearchState": "active",
+        "author_books": author_books, "reader_books": reader_books, "book": book
+    }
+    return render(request, "lib_admin/library/bookdetail.html", content)
+
+
 def commend(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     seed(str(datetime.now().date()))
     commend_rd = int(random() * 1000)
@@ -564,7 +761,7 @@ def commend(request):
 
 def datavisual(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     borrows = Borrow.objects.filter(Q(isAllowed=True) | Q(isAllowed__isnull=True))
     now = datetime.now()
@@ -597,12 +794,50 @@ def datavisual(request):
         "week_data": week_data, "month_data": month_data, "cate_data": cate_data, "school_data": school_data
     }
 
-    return render(request, "both/datavisual.html", content)
+    return render(request, "student/library/datavisual.html", content)
+
+
+def admin_datavisual(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    borrows = Borrow.objects.filter(Q(isAllowed=True) | Q(isAllowed__isnull=True))
+    now = datetime.now()
+    week_data = []
+    month_data = []
+    cate_data = []
+    school_data = []
+    for i in range(7):
+        day = now - timedelta(days=i)
+        week_data.append({"data": borrows.filter(BorrowTime=day).count(),
+                          "day": day.strftime("%m-%d")})
+        if i < 6:
+            month = now - relativedelta(months=i)
+            month_data.append(
+                {"data": borrows.filter(Q(BorrowTime__month=month.month) & Q(BorrowTime__year=month.year)).count(),
+                 "month": str(month.strftime("%Y-%m"))})
+    for cate in CATEGORY_CHOICE:
+        cate_data.append({
+            "cate": cate[1],
+            "data": borrows.filter(BookID__Category=cate[0]).count()
+        })
+    for school in SCHOOLS:
+        school_data.append({
+            "school": school[1],
+            "data": borrows.filter(ReaderID__School=school[0]).count()
+        })
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "dataState": "active",
+        "week_data": week_data, "month_data": month_data, "cate_data": cate_data, "school_data": school_data
+    }
+
+    return render(request, "lib_admin/library/datavisual.html", content)
 
 
 def checkingbooks(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     checkings = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed__isnull=True) & Q(isDelete=False)).order_by(
         '-BorrowTime')
@@ -618,7 +853,7 @@ def checkingbooks(request):
 
 def getmesnum(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return HttpResponse("no")
     if request.method == 'GET':
         num = Message.objects.filter(ReaderID=LoginUser).count()
@@ -628,7 +863,7 @@ def getmesnum(request):
 
 def showbred(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     bred_books = Borrow.objects.filter(
         Q(ReaderID=LoginUser) & Q(isAllowed=True) & Q(isReturned=False) & Q(isDelete=False)).order_by(
@@ -647,7 +882,7 @@ def showbred(request):
 
 def returnbook(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         raise Http404
     if request.method == "GET":
         ID = request.GET.get('id')
@@ -680,7 +915,7 @@ def returnbook(request):
 
 def delayreturn(request, id):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         raise Http404
     br = Borrow.objects.get(id=id)
     br.ReturnDay += timedelta(days=LoginUser.Class.Days)
@@ -694,7 +929,7 @@ def delayreturn(request, id):
 
 def showreturned(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     br = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isDelete=False) & Q(isReturned=True))
     content = {
@@ -707,7 +942,7 @@ def showreturned(request):
 
 def showillegal(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         return render(request, "page404.html")
     now = datetime.now().date()
     br = Borrow.objects.filter(Q(ReaderID=LoginUser) & Q(isAllowed=True) & (
@@ -733,7 +968,7 @@ def showillegal(request):
 
 def deletebr(request):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '1':
         raise Http404
     if request.method == "GET":
         br_id = request.GET.get('id')
@@ -746,7 +981,7 @@ def deletebr(request):
 
 def illegal_report(request, id):
     global AccountID, LoginUser, UserAccount
-    if AccountID is None or LoginUser is None or UserAccount is None or id is None:
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '1':
         return render(request, "page404.html")
 
     report_br = Borrow.objects.get(id=id)
@@ -755,7 +990,7 @@ def illegal_report(request, id):
         # 非当前读者的违规报告
 
         render(request, "page404.html")
-    elif (not report_br.isLegal) and report_br.isAllowed == True\
+    elif (not report_br.isLegal) and report_br.isAllowed == True \
             and report_br.isReturned == True:
 
         # 已归还， 但已经超期
@@ -794,3 +1029,201 @@ def illegal_report(request, id):
     #     print('errr')
     #     return render(request, "page404.html")
     return render(request, "page404.html")
+
+
+def sendMessage(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenMes": "menu-open", "MesState": "active", "MesSendState": "active",
+
+    }
+    if request.method == "POST":
+        form = NewMessForm(request.POST)
+        if form.is_valid():
+            # 数据合法
+            form.save()
+            content["form"], content["work"] = NewMessForm(), "work"
+        else:
+            content["form"] = form
+    else:
+        content["form"] = NewMessForm()
+
+    return render(request, "lib_admin/message/mes.html", content)
+
+
+def sendNotice(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenMes": "menu-open", "MesState": "active", "noticeState": "active",
+
+    }
+    if request.method == "POST":
+        form = NoticeForm(request.POST)
+        if form.is_valid():
+            # 数据合法
+            form.save()
+            content["form"], content["work"] = NoticeForm(), "work"
+        else:
+            content["form"] = form
+    else:
+        content["form"] = NoticeForm()
+
+    return render(request, "lib_admin/message/Notice.html", content)
+
+
+def cancelNotice(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return HttpResponse("no")
+    if request.method == 'GET':
+        ID = request.GET.get('ID')
+        Notice.objects.get(id=ID).delete()
+        return HttpResponse("ok")
+    return HttpResponse("no")
+
+
+def add_user(request):
+    global AccountID, LoginUser, UserAccount
+    # LoginUser: Reader
+    # UserAccount: User
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "addReaderState": "active"
+    }
+
+    if request.method == "POST":
+
+        form = AddReadInfForm(request.POST)
+        if form.is_valid():
+            content["work"] = "work"  # 数据合法
+            new_account = User()
+            new_reader = Reader()
+            new_account.Email = form.cleaned_data["Email"]
+            new_account.AccountID = form.cleaned_data["AccountID"]
+            new_account.Tel = form.cleaned_data["Tel"]
+            new_account.Password = form.cleaned_data["ReaderID"]
+            new_account.Type = '2'
+            new_account.save()
+            new_reader.School = form.cleaned_data["School"]
+            new_reader.Type = form.cleaned_data["Type"]
+            new_reader.ReaderID = form.cleaned_data["ReaderID"]
+            new_reader.AccountID_id = form.cleaned_data["AccountID"]
+            new_reader.Class_id = form.cleaned_data["Class"]
+            new_reader.save()
+            content["form"] = AddReadInfForm()
+        else:
+            content["form"] = form
+    else:
+        form = AddReadInfForm()
+        content["form"] = form
+    return render(request, "lib_admin/info/add_user.html", content)
+
+
+def add_class(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "addClassState": "active",
+    }
+    if request.method == "POST":
+        form = ClassForm(request.POST)
+        if form.is_valid():
+            # 数据合法
+            form.save()
+            content["form"], content["work"] = ClassForm(), "work"
+        else:
+            content["form"] = form
+    else:
+        content["form"] = ClassForm()
+    return render(request, 'lib_admin/info/add_class.html', content)
+
+
+def add_fine(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "addFineState": "active",
+    }
+    if request.method == "POST":
+        form = FineForm(request.POST)
+        print(request.POST)
+        if form.is_valid():
+            # 数据合法
+            form.save()
+            content["form"], content["work"] = FineForm(), "work"
+        else:
+            content["form"] = form
+    else:
+        content["form"] = FineForm()
+    return render(request, 'lib_admin/info/add_fine.html', content)
+
+
+def book_admin(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    if request.method == "GET":
+        op = request.GET.get("op")
+        BookID = request.GET.get("id")
+        if op == "add":
+            book = Book.objects.get(BookID=BookID)
+            book.NumNow += 1
+            book.NumInLib += 1
+            book.save()
+            NumNow = int(book.NumNow)
+            NumInLib = int(book.NumInLib)
+            return JsonResponse({"NumNow": NumNow, "NumInLib": NumInLib})
+        elif op == "cut":
+            book = Book.objects.get(BookID=BookID)
+            book.NumNow -= 1
+            book.NumInLib -= 1
+            book.save()
+            NumNow = int(book.NumNow)
+            NumInLib = int(book.NumInLib)
+            return JsonResponse({"NumNow": NumNow, "NumInLib": NumInLib})
+        elif op == "delete":
+            book = Book.objects.get(BookID=BookID)
+            if book.NumNow == book.NumInLib:
+                book.delete()
+                return HttpResponse("ok")
+            else:
+                return HttpResponse("err")
+    return HttpResponse("no")
+
+
+def add_book(request):
+
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenLib": "menu-open", "LibState": "active", "AddState": "active",
+    }
+    if request.method == "POST":
+        form = BookForm(request.POST)
+
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.NumNow = book.NumInLib
+            book.save()
+            content["work"] = "work"
+            content["form"] = BookForm()
+        else:
+
+            content["form"] = form
+    else:
+        content["form"] = BookForm()
+    return render(request, "lib_admin/library/add_book.html", content)

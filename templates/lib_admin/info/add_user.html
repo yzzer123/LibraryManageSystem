@@ -1,0 +1,108 @@
+{% extends "model/adminbase.html" %}
+{% block title %} 添加读者 {% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            // 初始化 select组件样式
+            $('.select2').select2()
+            $('.select3').select2()
+            $('.select4').select2()
+            $('.select5').select2()
+             $('[data-mask]').inputmask()
+            $('.select2bs4').select2({
+              theme: 'bootstrap4'
+            })
+
+            // 修改成功
+            if("{{ work }}" === "work"){
+             setTimeout(function () {
+                    alert("读者添加成功");
+             },200)
+         }
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form action="/add_user/" method="POST">
+
+    {% csrf_token %}
+      <!-- Input addon -->
+            <div class="card card-info " style="margin-top: -20px">
+              <div class="card-header  gradient-color-her">
+                <h3 class="font-weight-light" style="color: #0b2e13">添加读者</h3>
+              </div>
+              <div class="card-body">
+                  <span id="terms-error" class="warning invalid-feedback" style="display: inline;">注：密码默认为读者号</span>
+
+                  <div class="row"> <!--排版整个表单的row-->
+                      <div class="col-sm-5 offset-lg-1"><!--左侧一列-->
+
+                          <div class="form-group">
+                           <label for="{{ form.ReaderID.id_for_label }}">读者卡号</label>
+                          {{ form.ReaderID }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.ReaderID.errors }}</span>
+                        </div>
+
+                          <div class="form-group">
+                           <label for="{{ form.Class.id_for_label }}">读者级别</label>
+                          {{ form.Class }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Class.errors }}</span>
+                        </div>
+                          <div class="form-group">
+                               <label for="{{ form.School.id_for_label }}">学院</label>
+                                {{ form.School }}
+                              <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.School.errors }}</span>
+                          </div>
+                          <div class="form-group">
+                              <label for="{{ form.Tel.id_for_label }}">电话号码:</label>
+
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                </div>
+                                {{ form.Tel }}
+                                  <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Tel.errors }}</span>
+
+                              </div>
+                          </div>
+                              <!-- /.input group -->
+                              <div class="form-group">
+                              <label for="{{ form.Email.id_for_label }}">邮箱:</label>
+
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-mail-bulk"></i></span>
+                                </div>
+                                {{ form.Email }}
+                                  <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Email.errors }}</span>
+                              </div>
+                              </div>
+                        </div>
+
+                      <div class="col-sm-5"><!--右侧一列-->
+
+                      <div class="form-group">
+                           <label for="{{ form.AccountID.id_for_label }}">账户名称</label>
+                                {{ form.AccountID }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.AccountID.errors }}</span>
+                      </div>
+
+
+                            <div class="form-group">
+                           <label for="{{ form.Type.id_for_label }}">类别</label>
+                          {{ form.Type }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Type.errors }}</span>
+                        </div>
+                      </div>
+                  </div>
+                  <!--提交按钮-->
+                <div class="card-footer row " style="background-color: white">
+                  <button type="submit" id="pwd-smt"  class="btn btn-primary  offset-lg-1 pwd-smt-bnt">添加读者</button>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+     </form>
+{% endblock %}

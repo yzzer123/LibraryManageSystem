@@ -1,0 +1,154 @@
+{%  extends 'model/base.html' %}
+{% block title %}
+图书检索
+{% endblock %}
+<!--样式-->
+{% block StyleSheet %}
+ <link rel="stylesheet" href="/static/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+    <style>
+        .selection{
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+{% block script %}
+{#    表格元素#}
+
+   <script src="/static/plugins/datatables/jquery.dataTables.js"></script>
+<script src="/static/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    <script>
+     $(function () {
+            $("#example1").DataTable({"language": {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"}})
+            $('#example2').DataTable({"language":
+                    {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"},
+              "paging": true,
+              "lengthChange": false,
+              "searching": false,
+              "ordering": true,
+              "info": true,
+              "autoWidth": false,
+            });
+            var isBorrow = [];
+              {% for book in books %}
+                     $("#br{{ book.BookID }}").click(function () {
+                            if (isBorrow[{{ forloop.counter }}] !== true){
+
+                                $.ajax({
+                                    url : "{% url 'borrow' %}",    //提交URL
+                                    type : "GET",//处理方式
+                                    data : {id:{{ book.BookID }}},//提交的数据
+                                    success : function (data) {
+                                         if (data === "yes"){
+                                            alert("借阅申请已发出");
+                                            $("#br{{ book.BookID  }}").html("<button type=\"button\" class=\"btn btn-block btn-outline-danger btn-xs\">已选择</button>");
+                                            isBorrow[{{ forloop.counter }}] = true;
+                                         }else if (data === "out"){
+                                             alert("已超出可借阅上限");
+                                         }else if (data === "nobook"){
+                     alert("图书在架数量为0，借阅失败");
+                 }
+                                    },//执行成功后的回调函
+                                    error : function() {
+                                        alert("借阅失败！")
+                                    }
+
+                                })
+                            }
+                     })
+              {% endfor %}
+             $(".selection").click(function () {
+            var text = $(this).text()
+            $("#selected").text(text)
+            $("#searchtype").attr("value",text)
+
+        })
+
+     })
+    </script>
+{% endblock %}
+{% block content %}
+     <div class="row search-box" style="margin-top: 0px">
+                <!-- 主搜索框 -->
+            <form class="form-inline  m-auto" action="{% url "searchbooks" %}" method="POST">
+                {% csrf_token %}
+             <div class="input-group input-group-lg mb-3">
+                  <div class="input-group-prepend">
+                    <button type="button" id="selected" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                      {{ type }}
+                    </button>
+                    <ul class="dropdown-menu" style="">
+                        <li class="dropdown-item"><div class="nav-link selection" >全部</div></li>
+                      <li class="dropdown-item"><div class="nav-link selection" >书号</div></li>
+                      <li class="dropdown-item"><div class="nav-link selection" >书名</div></li>
+                      <li class="dropdown-item"><div class="nav-link selection" >作者</div></li>
+                      <li class="dropdown-item"><div class="nav-link selection" >出版社</div></li>
+                           <li class="dropdown-item"><div class="nav-link selection" >分类</div></li>
+
+                    </ul>
+                  </div>
+                  <!-- /btn-group -->
+                 <input type="text" id="searchtype" name="type" value="{{ type }}" hidden>
+                  <input type="text" name="keyword" value="{{ keyword }}" class="form-control" placeholder="搜索图书">
+                 <span class="input-group-append">
+                    <button type="submit" class="btn gradient-color-ver" style="color: white">搜索</button>
+                  </span>
+                </div>
+
+            </form>
+        </div>
+          <div class="row">
+        <div class="col-12">
+
+          <!-- /.card -->
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">图书检索结果 </h3>
+                {% if keyword %}
+                  &nbsp;&nbsp;&nbsp;&nbsp;查询关键词：  {{ keyword }}
+                {% endif %}
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="example1" class="table table-hover table-bordered">
+                <thead>
+                <tr>
+                  <th>编号</th>
+                  <th>书名</th>
+                  <th>作者</th>
+                  <th>出版社</th>
+                  <th>分类</th>
+                    <th>出版时间</th>
+                  <th>价格</th>
+                    <th>在架数量</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for book in books %}
+                <tr  >
+                  <td>{{ book.BookID }}</td>
+                  <td><a id="book{{ book.BookID  }}" href="{% url 'bookdetail' book.BookID %}">{{ book.BName }}</a></td>
+                    <td>{{ book.Author }}</td>
+                    <td>{{ book.Publisher }}</td>
+                    <td>{{ book.get_Category_display }}</td>
+                    <td>{{ book.PubTime }}</td>
+                    <td>{{ book.Price }}</td>
+                     <td class="num{{ book.BookID  }}">{{ book.NumNow}}</td>
+                    <td id="br{{ book.BookID  }}"><button type="button"  class="btn btn-block btn-outline-primary btn-xs">借阅</button></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+{% endblock %}

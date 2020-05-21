@@ -1,4 +1,4 @@
-{%  extends 'model/base.html' %}
+{%  extends 'model/adminbase.html' %}
 {% block title %}
 图书检索
 {% endblock %}
@@ -33,31 +33,68 @@
             });
             var isBorrow = [];
               {% for book in books %}
-                     $("#br{{ book.BookID }}").click(function () {
-                            if (isBorrow[{{ forloop.counter }}] !== true){
+                     $("#add{{ book.BookID  }}").click(function () {
 
-                                $.ajax({
-                                    url : "{% url 'borrow' %}",    //提交URL
-                                    type : "GET",//处理方式
-                                    data : {id:{{ book.BookID }}},//提交的数据
-                                    success : function (data) {
-                                         if (data === "yes"){
-                                            alert("借阅申请已发出");
-                                            $("#br{{ book.BookID  }}").html("<button type=\"button\" class=\"btn btn-block btn-outline-danger btn-xs\">已选择</button>");
-                                            isBorrow[{{ forloop.counter }}] = true;
-                                         }else if (data === "out"){
-                                             alert("已超出可借阅上限");
-                                         }else if (data === "nobook"){
-                     alert("图书在架数量为0，借阅失败");
-                 }
-                                    },//执行成功后的回调函
-                                    error : function() {
-                                        alert("借阅失败！")
-                                    }
+                     $.ajax({
+                    url : "/book_operation/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {op:"add" ,id:{{ book.BookID }}},//提交的数据
+                    success : function (data) {
 
-                                })
-                            }
+                         if (data === "err" || data === "no"){
+                            alert("入库失败！");
+                         }else {
+
+                              json_data = data;
+                             $("#numlib{{ book.BookID  }}").html(json_data.NumInLib);
+                             $("#num{{ book.BookID  }}").html(json_data.NumNow);
+                         }
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("入库失败！")
+                    }
                      })
+                 })
+
+                  $("#cut{{ book.BookID  }}").click(function () {
+
+                     $.ajax({
+                    url : "/book_operation/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {op:"cut" ,id:{{ book.BookID }}},//提交的数据
+                    success : function (data) {
+                         if (data === "err" || data === "no"){
+                            alert("出库失败！");
+                         }else {
+                             json_data = data;
+                             $("#numlib{{ book.BookID  }}").html(json_data.NumInLib);
+                             $("#num{{ book.BookID  }}").html(json_data.NumNow);
+                         }
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("出库失败！")
+                    }
+                     })
+                 })
+
+                  $("#delete{{ book.BookID  }}").click(function () {
+
+                     $.ajax({
+                    url : "/book_operation/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {op:"delete" ,id:{{ book.BookID }}},//提交的数据
+                    success : function (data) {
+                         if (data === "err" ){
+                            alert("删除失败！还有图书在借无法删除！");
+                         }else if(data === "ok"){
+                             $("#bk{{ book.BookID }}").hide();
+                         }
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("删除失败！")
+                    }
+                     })
+                 })
               {% endfor %}
              $(".selection").click(function () {
             var text = $(this).text()
@@ -72,7 +109,7 @@
 {% block content %}
      <div class="row search-box" style="margin-top: 0px">
                 <!-- 主搜索框 -->
-            <form class="form-inline  m-auto" action="{% url "searchbooks" %}" method="POST">
+            <form class="form-inline  m-auto" action="/admin_searchresult/" method="POST">
                 {% csrf_token %}
              <div class="input-group input-group-lg mb-3">
                   <div class="input-group-prepend">
@@ -113,10 +150,10 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="example1" class="table table-bordered table-striped">
+              <table id="example1" class="table table-bordered table-hover">
                 <thead>
                 <tr>
-                  <th>图书ID</th>
+                  <th>编号</th>
                   <th>书名</th>
                   <th>作者</th>
                   <th>出版社</th>
@@ -124,21 +161,29 @@
                     <th>出版时间</th>
                   <th>价格</th>
                     <th>在架数量</th>
+                    <th>馆藏数</th>
                     <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for book in books %}
-                <tr  >
+                <tr id="bk{{ book.BookID }}" >
                   <td>{{ book.BookID }}</td>
-                  <td><a id="book{{ book.BookID  }}" href="{% url 'bookdetail' book.BookID %}">{{ book.BName }}</a></td>
+                  <td><a id="book{{ book.BookID  }}" href="{% url 'admin_bookdetail' book.BookID %}">{{ book.BName }}</a></td>
                     <td>{{ book.Author }}</td>
                     <td>{{ book.Publisher }}</td>
                     <td>{{ book.get_Category_display }}</td>
                     <td>{{ book.PubTime }}</td>
                     <td>{{ book.Price }}</td>
-                     <td class="num{{ book.BookID  }}">{{ book.NumNow}}</td>
-                    <td id="br{{ book.BookID  }}"><button type="button"  class="btn btn-block btn-outline-primary btn-xs">借阅</button></td>
+                     <td id="num{{ book.BookID  }}">{{ book.NumNow}}</td>
+                    <td id="numlib{{ book.BookID  }}">{{ book.NumInLib}}</td>
+
+                    <td >
+                        <button id="add{{ book.BookID  }}" type="button"  class="btn"> <i class="fa fa-plus-circle" style="color: #66afe9"></i></button>
+                        <button id="cut{{ book.BookID  }}" type="button"  class="btn"> <i class="fa fa-minus-circle" style="color: #ef5b9c"></i></button>
+                        <button id="delete{{ book.BookID  }}" type="button"  class="btn"> <i class="fa fa-trash" style="color: #ef3c50"></i></button>
+
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>

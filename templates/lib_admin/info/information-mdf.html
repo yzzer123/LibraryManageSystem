@@ -1,0 +1,102 @@
+{% extends "model/adminbase.html" %}
+{% block title %} 信息修改 {% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            // 初始化 select组件样式
+
+            $('.select4').select2()
+
+             $('[data-mask]').inputmask()
+            $('.select2bs4').select2({
+              theme: 'bootstrap4'
+            })
+
+            // 修改成功
+            if("{{ work }}" === "work"){
+             setTimeout(function () {
+                    alert("信息保存成功");
+             },200)
+         }
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form action="/admin_infmdf/" method="POST">
+
+    {% csrf_token %}
+      <!-- Input addon -->
+            <div class="card card-info " style="margin-top: -20px">
+              <div class="card-header  gradient-color-her">
+                <h3 class="font-weight-light" style="color: #0b2e13">修改个人信息</h3>
+              </div>
+              <div class="card-body">
+
+                  <div class="row"> <!--排版整个表单的row-->
+                      <div class="col-sm-5 offset-lg-1"><!--左侧一列-->
+
+                          <div class="form-group">
+                           <label for="{{ form.AdminID.id_for_label }}">管理员工号</label>
+                          {{ form.AdminID }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.ReaderID.errors }}</span>
+                        </div>
+
+
+
+                          <div class="form-group">
+                              <label for="{{ form.Tel.id_for_label }}">电话号码:</label>
+
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                </div>
+                                {{ form.Tel }}
+                                  <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Tel.errors }}</span>
+
+                              </div>
+                          </div>
+                              <!-- /.input group -->
+                              <div class="form-group">
+                              <label for="{{ form.Email.id_for_label }}">邮箱:</label>
+
+                              <div class="input-group">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-mail-bulk"></i></span>
+                                </div>
+                                {{ form.Email }}
+                                  <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Email.errors }}</span>
+                              </div>
+                              </div>
+                        </div>
+
+                      <div class="col-sm-5"><!--右侧一列-->
+
+                      <div class="form-group">
+                           <label for="{{ form.AccountID.id_for_label }}">账户名称</label>
+                                {{ form.AccountID }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.School.errors }}</span>
+                      </div>
+                          <div class="form-group">
+                           <label for="{{ form.Name.id_for_label }}">姓名</label>
+                          {{ form.Name }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Name.errors }}</span>
+                        </div>
+                           <div class="form-group">
+                           <label for="{{ form.Gender.id_for_label }}">性别</label>
+                          {{ form.Gender }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.Gender.errors }}</span>
+                        </div>
+
+                      </div>
+                  </div>
+                  <!--提交按钮-->
+                <div class="card-footer row " style="background-color: white">
+                  <button type="submit" id="pwd-smt"  class="btn btn-primary  offset-lg-1 pwd-smt-bnt">提交</button>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+     </form>
+{% endblock %}

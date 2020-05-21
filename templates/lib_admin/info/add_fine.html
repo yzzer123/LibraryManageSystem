@@ -1,0 +1,58 @@
+{% extends "model/adminbase.html" %}
+{% block title %} 添加罚金机制 {% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            // 初始化 select组件样式
+
+            // 修改成功
+            if("{{ work }}" === "work"){
+             setTimeout(function () {
+                    alert("罚金机制添加成功");
+             },200)
+         }
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form action="/add_fine/" method="POST">
+
+    {% csrf_token %}
+      <!-- Input addon -->
+            <div class="card card-info " style="margin-top: -20px;min-height: 500px">
+              <div class="card-header  gradient-color-her">
+                <h3 class="font-weight-light" style="color: #0b2e13">添加罚金机制</h3>
+              </div>
+              <div class="card-body">
+                  <span id="terms-error" class="warning invalid-feedback" style="display: inline;">注：罚金规则为，当用户的逾期天数未超过当前上限，但大于前一个较小的时间上限，罚金按当前的罚金数额计算</span>
+
+                  <div class="row"> <!--排版整个表单的row-->
+                      <div class="col-sm-5 m-auto"><!--左侧一列-->
+
+                          <div class="form-group">
+                           <label for="{{ form.LimitDay.id_for_label }}">上限天数</label>
+                          {{ form.LimitDay }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.LimitDay.errors }}</span>
+                        </div>
+
+                          <div class="form-group">
+                           <label for="{{ form.FineMoney.id_for_label }}">罚金</label>
+                          {{ form.FineMoney }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.FineMoney.errors }}</span>
+                        </div>
+
+                        </div>
+
+
+                  </div>
+                  <!--提交按钮-->
+                <div class="card-footer row " style="background-color: white">
+                  <button type="submit" id="pwd-smt"  class="m-auto btn btn-primary  offset-lg-1 pwd-smt-bnt">添加</button>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+     </form>
+{% endblock %}

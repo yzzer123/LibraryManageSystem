@@ -45,7 +45,9 @@
            <input type="text"  class="input-box phone"   value="{{ phone }}" name="Phone" placeholder="手机号" required>
 
                <p class="errmsg"> {{ PhoneERR }}</p>
+            <input type="text"  class="input-box key"   value="{{ key }}" name="Key" placeholder="注册码" required>
 
+               <p class="errmsg"> {{ KeyERR }}</p>
             <br/>
             <div class="line">
             {% if checkedM %}
@@ -80,7 +82,10 @@
             let IdERR = "{{ IdERR }}";
             let EmailERR = "{{ EmailERR }}";
             let PhoneERR = "{{ PhoneERR }}";
+            let Key = "{{ KeyERR }}"
 
+             if (Key !== "")
+                 flash(".key",8,10,100);
 
             if (noAct !== "")
                 flash(".act",8,10,100);
