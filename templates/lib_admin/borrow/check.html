@@ -1,0 +1,179 @@
+{% extends 'model/adminbase.html' %}
+{% block title %}借阅审核{% endblock %}
+{% block script %}
+    <!-- jQuery Knob -->
+<script src="/static/plugins/jquery-knob/jquery.knob.min.js"></script>
+
+<script>
+     $(function () {
+
+
+           {% for rec in record %}
+            $("#agree{{ rec.id }}").click(function () {
+                $.ajax({
+                    url: '/check_borrow_op/',
+                    way: 'GET',
+                    data:{id: {{ rec.id }}, way:"agree"},
+                    success:function (data) {
+                        if (data === "ok"){
+                            $("#tr{{ rec.id }}").hide({duration:300});
+                        }else{
+                            alert(data)
+                        }
+                    },
+                    error:function () {
+                        alert("操作失败")
+                    }
+
+                })
+            })
+             $("#dis{{ rec.id }}").click(function () {
+                 $.ajax({
+                    url: '/check_borrow_op/',
+                    way: 'GET',
+                    data:{id: {{ rec.id }}, way:"disagree"},
+                    success:function (data) {
+                        if (data === "ok"){
+                            $("#tr{{ rec.id }}").hide({duration:300});
+                        }else{
+                            alert("操作失败")
+                        }
+                    },
+                    error:function () {
+                        alert("操作失败")
+                    }
+
+                })
+            })
+         {% endfor %}
+          $('.knob').knob({
+
+      draw: function () {
+
+        // "tron" 示例
+        if (this.$.data('skin') == 'tron') {
+
+          var a   = this.angle(this.cv)  // 角度
+            ,
+              sa  = this.startAngle          // 之前开始角
+            ,
+              sat = this.startAngle         // 开始角度
+            ,
+              ea                            // 之前结束角
+            ,
+              eat = sat + a                 // 结束角度
+            ,
+              r   = true
+
+          this.g.lineWidth = this.lineWidth
+
+          this.o.cursor
+          && (sat = eat - 0.3)
+          && (eat = eat + 0.3)
+
+          if (this.o.displayPrevious) {
+            ea = this.startAngle + this.angle(this.value)
+            this.o.cursor
+            && (sa = ea - 0.3)
+            && (ea = ea + 0.3)
+            this.g.beginPath()
+            this.g.strokeStyle = this.previousColor
+            this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false)
+            this.g.stroke()
+          }
+
+          this.g.beginPath()
+          this.g.strokeStyle = r ? this.o.fgColor : this.fgColor
+          this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false)
+          this.g.stroke()
+
+          this.g.lineWidth = 2
+          this.g.beginPath()
+          this.g.strokeStyle = this.o.fgColor
+          this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false)
+          this.g.stroke()
+
+          return false
+        }
+      }
+    })
+    /* 结束 JQUERY KNOB */
+
+     })
+</script>
+{% endblock %}
+
+{% block content %}
+
+  <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">借阅申请</h3>
+
+                <div class="card-tools">
+
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 540px;margin-top: 20px">
+                <table class="table table-hover table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>编号</th>
+                        <th>书号</th>
+                      <th>书名</th>
+                        <th>作者</th>
+                      <th>读者号</th>
+                      <th>姓名</th>
+                      <th>类型</th>
+                        <th>借阅天数</th>
+                        <th>违规次数</th>
+                        <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for br,rec in borrows %}
+                        <tr id="tr{{ rec.id }}">
+                          <td>{{ rec.id }}</td>
+                            <td>{{ rec.BookID_id }}</td>
+
+                          <td>{{ rec.BookID.BName }}</td>
+                            <td>{{ rec.BookID.Author }}</td>
+
+                          <td>{{ rec.ReaderID.ReaderID }}</td>
+                          <td>{{ rec.ReaderID.Name }}</td>
+                        <td>{{ rec.ReaderID.get_Type_display }}</td>
+                        <td>{{ rec.ReaderID.Class.Days }}天</td>
+                          <td class="row" >
+                              <div class="text-center" style="margin-left: 15px"  >
+                                  {% if br.illegal > 0 %}
+                                <input type="text" class="knob"  disabled="disabled" data-thickness="0.2" data-angleArc="250" data-angleOffset="-125"
+                                       value="{{ br.illegal }}" data-min="0" data-max="{{ br.legal }}" data-readonly="true" data-width="40" data-height="40" data-fgColor="#f05b72">
+                                  {% else %}
+                                        <input type="text" class="knob"  disabled="disabled" data-thickness="0.2" data-angleArc="250" data-angleOffset="-125"
+                                       value="{{ br.illegal }}" data-min="0" data-max="{{ br.legal }}" data-readonly="true" data-width="40" data-height="40" data-fgColor="#00c0ef">
+
+                                  {% endif %}
+                              </div>
+
+                          </td>
+
+                            <td>
+                            <button id="agree{{ rec.id }}" class="btn btn-outline-primary btn-sm" >同意</button>
+
+                                <button id="dis{{ rec.id }}" class="btn btn-outline-danger btn-sm" style="margin-left: 10px">拒绝</button>
+                            </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+{% endblock %}
+
+

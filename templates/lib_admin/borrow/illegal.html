@@ -1,0 +1,104 @@
+{% extends 'model/adminbase.html' %}
+{% block title %}已归还图书{% endblock %}
+{% block script %}
+<script>
+     $(function () {
+         {% for br in borrows %}
+             $("#delete{{ br.id }}").click(function () {
+                 $.ajax({
+                     url: "/admin_deletebr/",
+                     way: 'GET',
+                     data: {id:{{ br.id }} },
+                     success:function (data) {
+                         $("#tr{{ br.id }}").hide({duration: 300})
+                     },
+                     error: function () {
+                         alert("删除失败")
+                     }
+                 })
+             })
+              $("#remind{{ br.id }}").click(function () {
+                 $.ajax({
+                     url: "/remind/",
+                     way: 'GET',
+                     data: {id:{{ br.id }} },
+                     success:function (data) {
+                         alert("已发送")
+                     },
+                     error: function () {
+                         alert("发送失败")
+                     }
+                 })
+             })
+         {% endfor %}
+     })
+</script>
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">违规记录</h3>
+
+                <div class="card-tools">
+
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 540px;margin-top: 20px">
+                <table class="table table-hover table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>编号</th>
+                        <th>书号</th>
+                      <th>书名</th>
+                      <th>作者</th>
+                      <th>读者号</th>
+                        <th>姓名</th>
+                      <th>逾期时间</th>
+                        <th>罚金</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for br,fine in illegal_record %}
+                        <tr id="tr{{ br.id }}">
+                          <td>{{ br.id }}</td>
+                            <td>{{ br.BookID.BookID }}</td>
+                          <td>{{ br.BookID.BName }}</td>
+                          <td>{{ br.BookID.Author }}</td>
+                          <td>{{ br.ReaderID_id }}</td>
+                         <td>{{ br.ReaderID.Name }}</td>
+                        <td>{{ fine.days }}天</td>
+                        <td>{{ fine.fine_money }}元</td>
+
+                            {% if not br.isReturned %}
+                                <td ><button class="btn btn-success btn-sm" style="background-color: rgba(224,198,0,0.88);cursor: text">未归还</button></td>
+                            {% else %}
+                            <td ><button class="btn btn-danger btn-sm" style="background-color: #f15b6c;cursor: text">逾期归还</button></td>
+                            {% endif %}
+                            <td>
+                                <a href="{% url 'admin_illegal' br.id %}" target="_blank"><button class="btn btn-outline-primary btn-sm" >查看处罚报告</button></a>
+                                 {% if not br.isReturned %}
+                               <button id="remind{{ br.id }}" class="btn btn-outline-success btn-sm" >发送提醒</button>
+
+                                {% endif %}
+
+                                <button id="delete{{ br.id }}" class="btn btn-outline-danger btn-sm" >删除记录</button>
+                            </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+{% endblock %}
+
+

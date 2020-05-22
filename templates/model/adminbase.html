@@ -129,15 +129,15 @@
             </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
-                        <a class="nav-link {{ CheckState }}" href="{% url 'checking' %}">
+                        <a class="nav-link {{ CheckState }}" href="/check_borrow/">
                             <i class="far fa-circle nav-icon"></i>
                             <p>借阅申请审核</p>
                         </a>
                   </li>
                    <li class="nav-item">
-                        <a class="nav-link {{ IllegalState }}" href="/notreturn/">
+                        <a class="nav-link {{ IllegalState }}" href="/admin_showillegal/">
                             <i class="far fa-circle nav-icon"></i>
-                            <p>违规借阅审核</p>
+                            <p>违规借阅记录</p>
                         </a>
                   </li>
               </ul>
@@ -173,6 +173,12 @@
                     <a class="nav-link {{ addReaderState }}" href="/add_user/">
                         <i class="far fa-circle nav-icon"></i>
                         <p>添加读者账号</p>
+                    </a>
+              </li>
+              <li class="nav-item">
+                    <a class="nav-link {{ addReaderState }}" href="/add_user/">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>撤销读者账号</p>
                     </a>
               </li>
                <li class="nav-item">

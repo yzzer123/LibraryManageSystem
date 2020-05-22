@@ -979,6 +979,33 @@ def deletebr(request):
     return Http404
 
 
+def admin_deletebr(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        raise Http404
+    if request.method == "GET":
+        br_id = request.GET.get('id')
+        Borrow.objects.get(id=br_id).delete()
+        return HttpResponse("ok")
+    return HttpResponse("no")
+
+
+def remind_reader(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        raise Http404
+    if request.method == "GET":
+        br_id = request.GET.get('id')
+        br = Borrow.objects.get(id=br_id)
+        m = Message()
+        m.ReaderID = br.ReaderID
+        m.Title = "逾期未归还提醒"
+        m.Content = "您借阅的《%s》已经逾期，请您及时归还图书，以免罚金继续增长。"% br.BookID.BName
+        m.save()
+        return HttpResponse("ok")
+    return HttpResponse("no")
+
+
 def illegal_report(request, id):
     global AccountID, LoginUser, UserAccount
     if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '1':
@@ -1022,6 +1049,80 @@ def illegal_report(request, id):
         }
 
         return render(request, "student/borrow/report.html", content)
+    else:
+
+        return render(request, "page404.html")
+    # except:
+    #     print('errr')
+    #     return render(request, "page404.html")
+    return render(request, "page404.html")
+
+
+def admin_showillegal(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    now = datetime.now().date()
+    br = Borrow.objects.filter(Q(isAllowed=True) & (
+            (Q(isDelete=False) & Q(ReturnDay__lt=now) & Q(isReturned=False)) | (Q(isLegal=False) & Q(isReturned=True))))
+    fines = []
+    for item in br:
+        if not item.isReturned:
+            days = (now - item.ReturnDay).days
+        else:
+            days = (item.RealreturnDay - item.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+        fines.append(fine)
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+        'illegal_record': zip(br, fines), 'borrows': br
+    }
+    return render(request, "lib_admin/borrow/illegal.html", content)
+
+
+def admin_illegal_report(request, id):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+
+    report_br = Borrow.objects.get(id=id)
+    now = datetime.now()
+    if (not report_br.isLegal) and report_br.isAllowed == True \
+            and report_br.isReturned == True:
+
+        # 已归还， 但已经超期
+        days = (report_br.RealreturnDay - report_br.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+
+        content = {
+            "LoginUser": LoginUser, "UserAccount": UserAccount,
+            "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+            'report_br': report_br, "fine": fine, "nowDate": now.date()
+        }
+
+        return render(request, "lib_admin/borrow/report.html", content)
+    elif report_br.isAllowed == True and report_br.ReturnDay < now.date() and report_br.isReturned == False:
+        # 正在借阅 已经超期
+        days = (now.date() - report_br.ReturnDay).days
+        fine = {
+            "days": days,
+            "fine_money": Fine.objects.filter(LimitDay__gt=days).order_by('LimitDay')[0].FineMoney
+        }
+
+        content = {
+            "LoginUser": LoginUser, "UserAccount": UserAccount,
+            "OpenBr": "menu-open", "BrState": "active", "IllegalState": "active",
+            'report_br': report_br, "fine": fine, "nowDate": now.date()
+        }
+
+        return render(request, "lib_admin/borrow/report.html", content)
     else:
 
         return render(request, "page404.html")
@@ -1227,3 +1328,67 @@ def add_book(request):
     else:
         content["form"] = BookForm()
     return render(request, "lib_admin/library/add_book.html", content)
+
+
+def check_borrow(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenBr": "menu-open", "BrState": "active", "CheckState": "active",
+    }
+    record = Borrow.objects.filter(Q(isAllowed__isnull=True) & Q(isDelete=False))
+    borrows = [dict() for i in record]
+    now = datetime.now().date()
+    for item,br in zip(borrows, record):
+        illegal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) &Q(isDelete=False)
+                                      & Q(isAllowed=True) & (Q(ReturnDay__lt=now) | Q(isLegal=False))).count()
+        legal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) &Q(isDelete=False)
+                                      & Q(isAllowed=True)).count()
+        item["legal"] = legal
+        item["illegal"] = illegal
+    content["borrows"] = zip(borrows, record)
+    content["record"] = record
+    return render(request, 'lib_admin/borrow/check.html', content)
+
+
+def check_borrow_op(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return HttpResponse("no")
+    if request.method == 'GET':
+        way = request.GET.get("way")
+        brID = request.GET.get('id')
+        br = Borrow.objects.get(id=brID)
+        if way == 'agree':
+            if br.BookID.NumNow == 0:
+                return HttpResponse("在架书籍数量不足，借阅失败")
+            else:
+                book = br.BookID
+                book.NumNow -= 1
+                book.ReadTimes += 1
+                book.save()
+                br.isAllowed = True
+                now = datetime.now().date()
+                br.BorrowTime = now
+                br.ReturnDay = (now + timedelta(days=br.ReaderID.Class.Days))
+                br.save()
+                m = Message()
+                m.ReaderID = br.ReaderID
+                m.Title = "借阅申请结果"
+                m.Content = "您申请借阅《%s》的请求已通过，阅读愉快！"%book.BName
+                m.save()
+                return HttpResponse("ok")
+        elif way == 'disagree':
+            br.isAllowed = False
+            m = Message()
+            m.ReaderID = br.ReaderID
+            m.Title = "借阅申请结果"
+            m.Content = "对不起，由于库存或是您的违规情况，您申请借阅《%s》的请求已管理员被拒绝。"%br.BookID.BName
+            m.save()
+            br.save()
+            return HttpResponse("ok")
+        else:
+            return HttpResponse("no")
+    return HttpResponse("no")

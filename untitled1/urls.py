@@ -21,6 +21,7 @@ from django.urls import path
 from BuctLib import views
 from django.views.generic.base import RedirectView
 
+
 urlpatterns = (
     path('admin/', admin.site.urls),
     path('loginout/', views.loginout),
@@ -35,6 +36,11 @@ urlpatterns = (
     path(r'registercheck/', views.registerCheck),
     path(r'book_operation/', views.book_admin),
     path(r'add_book/', views.add_book),
+    path(r'check_borrow/', views.check_borrow),
+    path(r'check_borrow_op/', views.check_borrow_op),
+    path(r'admin_showillegal/', views.admin_showillegal),
+    path(r'admin_deletebr/', views.admin_deletebr),
+    path(r'remind/', views.remind_reader),
     path(r'404/', views.page404),
     path(r'jump/', views.jump),
     path(r'add_user/', views.add_user),
@@ -60,6 +66,7 @@ urlpatterns = (
     path(r'sendNotice/', views.sendNotice),
     path(r'deletebr/', views.deletebr),
     path(r'admin_searchresult/', views.admin_searchbooks),
+    url(r'admin_illegal_report/(\d+)/$', views.admin_illegal_report, name="admin_illegal"),
     url(r'checking/', views.checkingbooks, name='checking'),
     url(r'brrow/', views.borrow, name='borrow'),
     url(r'searchresult/', views.searchbooks, name="searchbooks"),
