@@ -1,0 +1,132 @@
+{%  extends 'model/adminbase.html' %}
+{% block title %}
+读者撤销
+{% endblock %}
+<!--样式-->
+{% block StyleSheet %}
+ <link rel="stylesheet" href="/static/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+    <style>
+        .selection{
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+{% block script %}
+{#    表格元素#}
+
+   <script src="/static/plugins/datatables/jquery.dataTables.js"></script>
+<script src="/static/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    <script>
+     $(function () {
+            $("#example1").DataTable({"language": {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"}})
+            $('#example2').DataTable({"language":
+                    {"url": "/static/plugins/datatables/Chinese.json"},
+                "language": {"url": "/static/plugins/datatables/Chinese.json"},
+              "paging": true,
+              "lengthChange": false,
+              "searching": false,
+              "ordering": true,
+              "info": true,
+              "autoWidth": false,
+            });
+
+              {% for reader in readers %}
+                     $("#remind{{ reader.ReaderID }}").click(function () {
+                     $.ajax({
+                    url : "/delete_reader_ajax/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {way:"remind" ,id:{{ reader.ReaderID }}},//提交的数据
+                    success : function (data) {
+                         if (data === "ok"){
+                            alert("提醒已发出！")
+                         }else {
+                            alert(data);
+                         }
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("操作失败！")
+                    }
+                     })
+                 })
+
+                   $("#delete{{ reader.ReaderID }}").click(function () {
+                     $.ajax({
+                    url : "/delete_reader_ajax/",    //提交URL
+                    type : "GET",//处理方式
+                    data : {way:"delete" ,id:{{ reader.ReaderID }}},//提交的数据
+                    success : function (data) {
+                         if (data === "ok"){
+                            $("#rd{{ reader.ReaderID }}").hide()
+                         }else {
+                            alert(data);
+                         }
+                    },//执行成功后的回调函
+                    error : function() {
+                        alert("操作失败！")
+                    }
+                     })
+                 })
+              {% endfor %}
+     })
+    </script>
+{% endblock %}
+{% block content %}
+
+          <div class="row">
+        <div class="col-12">
+
+          <!-- /.card -->
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">读者列表</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="example1" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>读者号</th>
+                  <th>姓名</th>
+                  <th>性别</th>
+                  <th>类型</th>
+                  <th>学院</th>
+                    <th>等级</th>
+                  <th>账号</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for reader in readers %}
+                <tr id="rd{{ reader.ReaderID }}" >
+                <td>{{ reader.ReaderID }}</td>
+                    {% if reader.Name %}
+                  <td>{{ reader.Name }}</td>
+                    {% else %}
+                    <td>(未填写)</td>
+                    {% endif %}
+                    <td>{{ reader.get_Gender_display }}</td>
+                    <td>{{ reader.get_Type_display }}</td>
+                    <td>{{ reader.get_School_display }}</td>
+                    <td>{{ reader.Class_id }}</td>
+                    <td>{{ reader.AccountID_id }}</td>
+                    <td >
+                        <button class="btn btn-sm btn-outline-success" id="remind{{ reader.ReaderID }}">提醒还书</button>
+                        <button class="btn btn-sm btn-outline-danger" id="delete{{ reader.ReaderID }}">撤销</button>
+
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+{% endblock %}

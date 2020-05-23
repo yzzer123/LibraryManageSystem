@@ -1000,7 +1000,7 @@ def remind_reader(request):
         m = Message()
         m.ReaderID = br.ReaderID
         m.Title = "逾期未归还提醒"
-        m.Content = "您借阅的《%s》已经逾期，请您及时归还图书，以免罚金继续增长。"% br.BookID.BName
+        m.Content = "您借阅的《%s》已经逾期，请您及时归还图书，以免罚金继续增长。" % br.BookID.BName
         m.save()
         return HttpResponse("ok")
     return HttpResponse("no")
@@ -1305,7 +1305,6 @@ def book_admin(request):
 
 
 def add_book(request):
-
     global AccountID, LoginUser, UserAccount
     if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
         return render(request, "page404.html")
@@ -1341,10 +1340,10 @@ def check_borrow(request):
     record = Borrow.objects.filter(Q(isAllowed__isnull=True) & Q(isDelete=False))
     borrows = [dict() for i in record]
     now = datetime.now().date()
-    for item,br in zip(borrows, record):
-        illegal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) &Q(isDelete=False)
-                                      & Q(isAllowed=True) & (Q(ReturnDay__lt=now) | Q(isLegal=False))).count()
-        legal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) &Q(isDelete=False)
+    for item, br in zip(borrows, record):
+        illegal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) & Q(isDelete=False)
+                                        & Q(isAllowed=True) & (Q(ReturnDay__lt=now) | Q(isLegal=False))).count()
+        legal = Borrow.objects.filter(Q(ReaderID=br.ReaderID) & Q(isDelete=False)
                                       & Q(isAllowed=True)).count()
         item["legal"] = legal
         item["illegal"] = illegal
@@ -1377,7 +1376,7 @@ def check_borrow_op(request):
                 m = Message()
                 m.ReaderID = br.ReaderID
                 m.Title = "借阅申请结果"
-                m.Content = "您申请借阅《%s》的请求已通过，阅读愉快！"%book.BName
+                m.Content = "您申请借阅《%s》的请求已通过，阅读愉快！" % book.BName
                 m.save()
                 return HttpResponse("ok")
         elif way == 'disagree':
@@ -1385,10 +1384,214 @@ def check_borrow_op(request):
             m = Message()
             m.ReaderID = br.ReaderID
             m.Title = "借阅申请结果"
-            m.Content = "对不起，由于库存或是您的违规情况，您申请借阅《%s》的请求已管理员被拒绝。"%br.BookID.BName
+            m.Content = "对不起，由于库存或是您的违规情况，您申请借阅《%s》的请求已管理员被拒绝。" % br.BookID.BName
             m.save()
             br.save()
             return HttpResponse("ok")
         else:
             return HttpResponse("no")
+    return HttpResponse("no")
+
+
+def apply_check(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "applyState": "active",
+        "apply": ApplyClass.objects.all()
+    }
+    illegal_rate = [dict() for i in content["apply"]]
+    now = datetime.now().date()
+    for item, rate in zip(content["apply"], illegal_rate):
+        illegal = Borrow.objects.filter(Q(ReaderID=item.ReaderID) & Q(isDelete=False)
+                                        & Q(isAllowed=True) & (Q(ReturnDay__lt=now) | Q(isLegal=False))).count()
+        legal = Borrow.objects.filter(Q(ReaderID=item.ReaderID) & Q(isDelete=False)
+                                      & Q(isAllowed=True)).count()
+        rate["all"] = legal
+        rate["illegal"] = illegal
+    content["zip_rate_apply"] = zip(illegal_rate, content["apply"])
+    return render(request, "lib_admin/info/class_apply_check.html", content)
+
+
+def apply_check_ajax(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return HttpResponse("no")
+    if request.method == 'GET':
+        apply_id = request.GET.get("id")
+        way = request.GET.get("way")
+        apply = ApplyClass.objects.get(id=apply_id)
+        if way == "agree":
+            reader = apply.ReaderID
+            reader.Class = apply.Class
+            reader.save()
+            m = Message()
+            m.ReaderID = apply.ReaderID
+            m.Title = "级别变更申请通过"
+            m.Content = "恭喜您，经过管理员的资格审查，您的级别变更申请已通过。"
+            m.save()
+            apply.delete()
+            return HttpResponse("ok")
+        elif way == "disagree":
+            m = Message()
+            m.ReaderID = apply.ReaderID
+            m.Title = "级别变更申请驳回"
+            m.Content = "对不起，经过管理员的资格审查，您的级别变更申请被拒绝。"
+            m.save()
+            apply.delete()
+            return HttpResponse("ok")
+    return HttpResponse("no")
+
+
+def delete_reader(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "deleteReader": "active",
+        "readers": Reader.objects.all()
+    }
+    return render(request, "lib_admin/info/readers.html", content)
+
+
+def delete_reader_ajax(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return HttpResponse("no")
+    if request.method == "GET":
+        ReaderID = request.GET.get("id")
+        way = request.GET.get("way")
+        if way == "delete":
+            reader = Reader.objects.get(ReaderID=ReaderID)
+            borrow = Borrow.objects.filter(Q(ReaderID=reader) & Q(isAllowed=True) & Q(isReturned=False)).count()
+            if borrow > 0:
+                return HttpResponse("该读者还有在借图书，只有全部归还完图书后才能撤销账号")
+            else:
+                user = reader.AccountID
+                user.delete()
+                reader.delete()
+                return HttpResponse("ok")
+        elif way == "remind":
+            m = Message()
+            m.ReaderID_id = ReaderID
+            m.Title = "还书提醒"
+            m.Content = "管理员提醒您，请及时归还全部图书，谢谢配合。"
+            m.save()
+            return HttpResponse("ok")
+    return HttpResponse("no")
+
+
+def class_mdf_list(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "mdfClassState": "active",
+        "classes": ReaderClass.objects.all()
+    }
+    return render(request, "lib_admin/info/mdf_class.html", content)
+
+
+def class_mdf(request, ID):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "mdfClassState": "active",
+    }
+
+    Class = ReaderClass.objects.get(Class=ID)
+    content["class"] = Class
+    if request.method == "POST":
+        form = ClassMdfForm(request.POST, initial={
+            "Class": Class.Class,
+            "Limited": Class.Limited,
+            "Days": Class.Days
+        })
+        if form.is_valid():
+            Class.Days = form.cleaned_data.get("Days")
+            Class.Limited = form.cleaned_data.get("Limited")
+            Class.save()
+            content["work"] = "work"
+            content["form"] = form
+        else:
+            content["form"] = form
+    else:
+        content["form"] = ClassMdfForm(initial={
+            "Class": Class.Class,
+            "Limited": Class.Limited,
+            "Days": Class.Days
+        })
+
+    return render(request, 'lib_admin/info/mdf_class_detail.html', content)
+
+
+def fine_mdf_list(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "mdfFineState": "active",
+        "fines": Fine.objects.all().order_by('LimitDay')
+    }
+    return render(request, "lib_admin/info/mdf_fine.html", content)
+
+
+def fine_mdf(request, ID):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return render(request, "page404.html")
+    content = {
+        "LoginUser": LoginUser, "UserAccount": UserAccount,
+        "OpenInf": "menu-open", "InfState": "active", "mdfFineState": "active",
+    }
+    fine = Fine.objects.get(id=ID)
+    content["fine"] = fine
+    if request.method == "POST":
+        form = FineMdfForm(request.POST, initial={
+            "LimitDay": fine.LimitDay,
+            "FineMoney": fine.FineMoney,
+        })
+        if form.is_valid():
+            fine.LimitDay = form.cleaned_data.get("LimitDay")
+            fine.FineMoney = form.cleaned_data.get("FineMoney")
+            fine.save()
+            content["work"] = "work"
+            content["form"] = form
+        else:
+            content["form"] = form
+    else:
+        content["form"] = FineMdfForm(initial={
+            "LimitDay": fine.LimitDay,
+            "FineMoney": fine.FineMoney,
+        })
+
+    return render(request, 'lib_admin/info/mdf_fine_detail.html', content)
+
+
+def admin_class_fine_ajax(request):
+    global AccountID, LoginUser, UserAccount
+    if AccountID is None or LoginUser is None or UserAccount is None or id is None or UserAccount.Type == '2':
+        return HttpResponse("no")
+    if request.method == "GET":
+        way = request.GET.get("way")
+        ID = request.GET.get("id")
+        if way == "class":
+            if Reader.objects.filter(Class_id=ID).count() > 0:
+                return HttpResponse("有读者属于该级别，不能删除")
+            else:
+                ReaderClass.objects.get(Class=ID).delete()
+                return HttpResponse("ok")
+        elif way == "fine":
+            if ID == '10':
+                return HttpResponse("最高处罚机制只能修改不能删除")
+            else:
+                Fine.objects.get(id=ID).delete()
+                return HttpResponse("ok")
     return HttpResponse("no")

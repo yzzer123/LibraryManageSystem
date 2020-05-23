@@ -1,0 +1,56 @@
+{% extends "model/adminbase.html" %}
+{% block title %} 修改罚金机制 {% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            // 初始化 select组件样式
+
+            // 修改成功
+            if("{{ work }}" === "work"){
+             setTimeout(function () {
+                    alert("保存成功！");
+             },400)
+         }
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form action="{% url 'fine_mdf' fine.id %}" method="POST">
+    {% csrf_token %}
+      <!-- Input addon -->
+            <div class="card card-info " style="margin-top: -20px;min-height: 500px">
+              <div class="card-header  gradient-color-her">
+                <h3 class="font-weight-light" style="color: #0b2e13">修改罚金机制</h3>
+              </div>
+              <div class="card-body">
+
+                  <div class="row"> <!--排版整个表单的row-->
+                      <div class="col-sm-5 m-auto"><!--左侧一列-->
+
+                          <div class="form-group">
+                           <label for="{{ form.LimitDay.id_for_label }}">逾期天数上限</label>
+                          {{ form.LimitDay }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.LimitDay.errors }}</span>
+                        </div>
+
+                          <div class="form-group">
+                           <label for="{{ form.FineMoney.id_for_label }}">罚金</label>
+                          {{ form.FineMoney }}
+                          <span id="terms-error" class="error invalid-feedback" style="display: inline;">{{ form.FineMoney.errors }}</span>
+                        </div>
+
+                        </div>
+
+
+                  </div>
+                  <!--提交按钮-->
+                <div class="card-footer row " style="background-color: white">
+                  <button type="submit" id="pwd-smt"  class="m-auto btn btn-primary  offset-lg-1 pwd-smt-bnt">保存</button>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+     </form>
+{% endblock %}

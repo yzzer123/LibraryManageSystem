@@ -1,0 +1,79 @@
+{% extends 'model/adminbase.html' %}
+{% block title %}修改读者级别权限{% endblock %}
+{% block script %}
+
+<script>
+     $(function () {
+           {% for class in classes %}
+            $("#delete{{ class.Class }}").click(function () {
+                $.ajax({
+                    url: '/admin_class_fine_ajax/',
+                    way: 'GET',
+                    data:{id: "{{ class.Class }}", way:"class"},
+                    success:function (data) {
+                        if (data === "ok"){
+                            $("#tr{{ class.Class }}").hide({duration:300});
+                        }else{
+                            alert(data)
+                        }
+                    },
+                    error:function () {
+                        alert("操作失败")
+                    }
+
+                })
+            })
+         {% endfor %}
+
+     })
+</script>
+{% endblock %}
+
+{% block content %}
+
+  <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">修改读者级别权限</h3>
+
+                <div class="card-tools">
+
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 540px;margin-top: 20px">
+                <table class="table table-hover table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>级别名称</th>
+                      <th>可借书本数</th>
+                      <th>借阅天数</th>
+                        <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for class in classes %}
+                        <tr id="tr{{ class.Class }}">
+                          <td>{{ class.Class }}</td>
+                            <td>{{ class.Limited }}</td>
+
+                          <td>{{ class.Days }}天</td>
+                        <td>
+                        <a target="_blank" href="{% url 'class_mdf' class.Class %}"><button  class="btn btn-outline-primary btn-sm" >编辑</button></a>
+
+                            <button id="delete{{ class.Class }}" class="btn btn-outline-danger btn-sm" style="margin-left: 10px">删除</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+{% endblock %}
+
+

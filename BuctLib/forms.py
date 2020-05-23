@@ -80,7 +80,7 @@ class ApplyChangeClass(forms.Form):
     Class = forms.ChoiceField(label="级别", required=False,
                               choices=map(lambda item: (item["Class"], item[
                                   "Class"] + "-------------------------可借%d本---------------------借阅时间上限%d天" % (
-                                                        item["Limited"], item["Days"])),
+                                                            item["Limited"], item["Days"])),
                                           ReaderClass.objects.values()),
                               widget=widgets.Select(attrs={"class": "form-control select3"}))
     Message = forms.CharField(label="备注", empty_value="", required=False,
@@ -284,7 +284,7 @@ class ClassForm(forms.ModelForm):
         widgets = {
             'Class': forms.TextInput(attrs={'class': 'form-control'}),
             'Limited': forms.NumberInput(attrs={'class': 'form-control'}),
-             'Days': forms.NumberInput(attrs={'class': 'form-control'})
+            'Days': forms.NumberInput(attrs={'class': 'form-control'})
         }
         error_messages = {
             'Class': {'required': '等级名称是必填写的'},  # 设置错误提示信息
@@ -306,9 +306,9 @@ class BookForm(forms.ModelForm):
         model = Book
         exclude = ["ReadTimes", "NumNow"]
         widgets = {
-            'BName':  forms.TextInput(attrs={'class': 'form-control'}),
-            'Publisher':  forms.TextInput(attrs={'class': 'form-control'}),
-            'Author':  forms.TextInput(attrs={'class': 'form-control'}),
+            'BName': forms.TextInput(attrs={'class': 'form-control'}),
+            'Publisher': forms.TextInput(attrs={'class': 'form-control'}),
+            'Author': forms.TextInput(attrs={'class': 'form-control'}),
             'Content': widgets.Textarea(attrs={'class': 'form-control', 'style': 'max-height:150px;'}),
             'Price': forms.NumberInput(attrs={'class': 'form-control'}),
             'NumInLib': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -326,3 +326,42 @@ class BookForm(forms.ModelForm):
         }
 
 
+class ClassMdfForm(forms.Form):
+    Class = forms.CharField(label="电话号码", max_length=10,
+                            required=False,
+                            disabled=True,
+                            widget=widgets.TextInput(
+                                attrs={'class': 'form-control'})
+                            )
+    Limited = forms.IntegerField(label="邮箱", required=True,
+                                 widget=widgets.NumberInput(attrs={"class": "form-control"}),
+                                 error_messages={
+                                     'required': '借阅上限不能为空'
+                                 })
+    Days = forms.IntegerField(label="邮箱", required=True,
+                              widget=widgets.NumberInput(attrs={"class": "form-control"}),
+                              error_messages={
+                                  'required': '借阅天数不能为空'
+                              })
+
+
+class FineMdfForm(forms.Form):
+    LimitDay = forms.IntegerField(label="邮箱", required=True,
+                                  widget=widgets.NumberInput(attrs={"class": "form-control"}),
+                                  error_messages={
+                                      'required': '上限天数不能为空'
+                                  })
+    FineMoney = forms.IntegerField(label="邮箱", required=True,
+                                   widget=widgets.NumberInput(attrs={"class": "form-control"}),
+                                   error_messages={
+                                       'required': '罚金不能为空'
+                                   })
+
+    def clean(self):
+        changed_datas = self.changed_data
+        if "LimitDay" in changed_datas:
+            LimitDay = self.cleaned_data.get("LimitDay")
+            if Fine.objects.filter(LimitDay=LimitDay).exists():
+                raise forms.ValidationError({"LimitDay": '该上限天数规则已存在'})
+
+        return self.cleaned_data
