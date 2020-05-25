@@ -45,29 +45,22 @@
            <input type="text"  class="input-box phone"   value="{{ phone }}" name="Phone" placeholder="手机号" required>
 
                <p class="errmsg"> {{ PhoneERR }}</p>
-            <input type="text"  class="input-box key"   value="{{ key }}" name="Key" placeholder="注册码" required>
+            <input type="password"  class="input-box key"   value="{{ key }}" name="Key" placeholder="注册码" required>
 
-               <p class="errmsg"> {{ KeyERR }}</p>
+               <p class="errmsg key"> {{ KeyERR }}</p>
             <br/>
             <div class="line">
-            {% if checkedM %}
-                <div class="radio">
-                <input type="radio" name="type" value="1" id="1" checked="checked"> <label   class="radio-label" for="0">管理员</label>
-			    </div>
-            {% else %}
-                <div class="radio">
-                <input type="radio" name="type" value="1" id="1" > <label  class="radio-label"   for="0">管理员</label>
-                 </div>
-            {% endif %}
-            {% if checkedR %}
-                <div class="radio">
-                <input type="radio" name="type" value="2" id="2" checked="checked"> <label  class="radio-label"  for="1">读者</label>
-                 </div>
-            {% else %}
-                <div class="radio">
-                <input type="radio" name="type" value="2" id="2" > <label  class="radio-label" for="1">读者</label>
-                 </div>
-            {% endif %}
+
+            <div class="radio">
+            <input type="radio" name="type" value="2" id="2" > <label  class="radio-label"  for="1">读者</label>
+             </div>
+
+
+            <div class="radio">
+            <input type="radio" name="type" value="1" id="1" > <label   class="radio-label" for="0">管理员</label>
+            </div>
+
+
             </div>
             <input type="submit" class="btn" value="注册">
             <div class="msg">已有账号？<a href="/">返回</a></div>
@@ -100,10 +93,25 @@
             $('.carousel').carousel({
               interval: 5000
             })
+
             $('.btn').click(function () {
                 flash(this,8,10,100);
             })
+             $('input[name="type"]').click(function () {
+                   let value=$('input[name="type"]:checked').val()
+                    if(value == '1'){
+                        $(".key").show()
+                    }else{
+                        $(".key").hide()
+                    }
 
+             })
+             {% if checkedM %}
+                 $(':radio[name="type"][value="1"]').prop("checked", "checked");
+             {% else %}
+                  $(".key").hide();
+                 $(':radio[name="type"][value="2"]').prop("checked", "checked");
+             {% endif %}
         });
     </script>
 </body>

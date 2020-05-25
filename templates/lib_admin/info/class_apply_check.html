@@ -99,6 +99,19 @@
      })
 </script>
 {% endblock %}
+{% block StyleSheet %}
+<style>
+ .text{
+     width: 120px;
+     display: block;
+     height: auto;
+     word-wrap: break-word;
+     word-break: break-all;
+
+ }
+
+</style>
+{% endblock %}
 
 {% block content %}
 
@@ -114,12 +127,13 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body table-responsive p-0" style="height: 540px;margin-top: 20px">
-                <table class="table table-hover table-head-fixed text-nowrap">
+                <table class="table table-hover table-head-fixed">
                   <thead>
                     <tr>
                       <th>读者号</th>
                       <th>姓名</th>
                       <th>类型</th>
+                        <th width="100px">申请理由</th>
                      <th>原等级</th>
                     <th>申请等级</th>
                     <th>违规次数</th>
@@ -133,6 +147,7 @@
                             <td>{{ apply.ReaderID.Name }}</td>
 
                           <td>{{ apply.ReaderID.get_Type_display }}</td>
+                        <td><div class="text">{{ apply.Message }}</div></td>
                             <td>{{ apply.ReaderID.Class_id }}--{{ apply.ReaderID.Class.Limited }}本--{{ apply.ReaderID.Class.Days }}天</td>
                           <td>{{ apply.Class_id }}--{{ apply.Class.Limited }}本--{{ apply.Class.Days }}天</td>
 

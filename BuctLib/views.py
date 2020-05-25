@@ -125,8 +125,8 @@ def register(request):
         'isIdERR': False,
         'isEmailERR': False,
         'isPhoneERR': False,
-        "checkedM": True,
-        "checkedR": False,
+        "checkedM": False,
+        "checkedR": True,
     }
     return render(request, "register.html", content)
 
@@ -152,10 +152,11 @@ def registerCheck(request):
         'isIdERR': False,
         'isEmailERR': False,
         'isPhoneERR': False,
-        "checkedM": True,
-        "checkedR": False,
+        "checkedM": False,
+        "checkedR": True,
         'PwdERR': check_pwd(pwd),
         'ActERR': check_user_name(account),
+        "key": "",
         "KeyERR": "",
         'IdERR': check_id(ID),
         'EmailERR': check_email(email),  # Django会自动检查邮箱
@@ -201,9 +202,6 @@ def registerCheck(request):
             content["isIdERR"] = True
             content["IdERR"] = "学号已被注册"
             return render(request, "register.html", content)
-        if Key != "reader_user":
-            content["KeyERR"] = "注册码不正确"
-            return render(request, "register.html", content)
         user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
         reader = Reader.objects.create(ReaderID=ID, AccountID=user)
         reader.save()
@@ -216,6 +214,7 @@ def registerCheck(request):
             return render(request, "register.html", content)
         if Key != "admin_manager":
             content["KeyERR"] = "注册码不正确"
+            content["key"] = Key
             return render(request, "register.html", content)
         user = User.objects.create(AccountID=account, Password=pwd, Type=Type, Tel=phone, Email=email)
         manager = Manager.objects.create(ManagerID=ID, AccountID=user)
